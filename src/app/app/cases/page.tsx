@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { CaseCard } from '@/components/app/CaseCard'
 import { buttonVariants } from '@/components/ui/button-variants'
 import { FolderPlus, FolderOpen } from 'lucide-react'
@@ -61,7 +61,10 @@ export default async function CasesPage({ searchParams }: CasesPageProps) {
 
   const { data: cases } = await query
 
-  // Batch-generate signed thumbnail URLs for all displayable primary files
+  // Batch-generate signed thumbnail URLs for all displayable primary files.
+  // Must use the service client — the case-images bucket has no storage RLS
+  // policies, so the user-scoped anon client silently returns null for signed URLs.
+  const serviceClient = createServiceClient()
   const DISPLAYABLE_TYPES = new Set(['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'])
   const thumbnailUrls: Record<string, string> = {}
 
@@ -74,7 +77,7 @@ export default async function CasesPage({ searchParams }: CasesPageProps) {
       }
     }
     if (entries.length > 0) {
-      const { data: signedData } = await supabase.storage
+      const { data: signedData } = await serviceClient.storage
         .from('case-images')
         .createSignedUrls(entries.map((e) => e.path), 3600)
       if (signedData) {
