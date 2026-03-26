@@ -1,4 +1,6 @@
 import { InfoIcon } from 'lucide-react'
+import { LVAuthenticityIndexLogo } from '@/components/brand/LVAuthenticityIndexLogo'
+import { QualitySeal } from '@/components/brand/QualitySeal'
 
 const bands = [
   {
@@ -75,9 +77,11 @@ export function AuthenticityIndexScale() {
           <p className="text-[#60A5FA] text-xs font-semibold uppercase tracking-widest mb-4">
             Scoring Standard
           </p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-4">
-            The LV Authenticity Index™
-          </h2>
+          {/* Brand logo + seal */}
+          <div className="flex flex-col items-center gap-3 mb-6">
+            <QualitySeal size={72} sealColor="#0A1628" detailColor="#60A5FA" />
+            <LVAuthenticityIndexLogo width={320} className="text-white" />
+          </div>
           <p className="text-[#64748B] text-base leading-relaxed">
             A professional standard for evaluating photographic integrity — from authentic capture to synthetic generation, expressed as a single scored risk band.
           </p>

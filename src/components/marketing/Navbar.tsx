@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
-import { MenuIcon, ShieldCheckIcon, XIcon } from 'lucide-react'
+import { MenuIcon, XIcon } from 'lucide-react'
 import {
   Sheet,
   SheetContent,
@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { LvisLogoSimple } from '@/components/brand/LvisLogoSimple'
 
 const navLinks = [
   { label: 'How It Works', href: '/#how-it-works' },
@@ -34,16 +35,8 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between gap-6">
           {/* Wordmark */}
-          <Link href="/" className="flex items-center gap-3 shrink-0">
-            <div className="flex items-center justify-center w-8 h-8 rounded bg-[#1E3A5F] border border-[#2D5A8E]/40">
-              <ShieldCheckIcon className="size-4 text-[#60A5FA]" />
-            </div>
-            <div className="flex flex-col leading-none">
-              <span className="text-white font-bold text-xl tracking-tight">LVIS™</span>
-              <span className="text-[#64748B] text-[10px] font-medium tracking-wide hidden md:block">
-                Luis Velasquez Image Integrity System™
-              </span>
-            </div>
+          <Link href="/" className="flex items-center shrink-0" aria-label="LVIS™ Home">
+            <LvisLogoSimple width={96} className="text-white" />
           </Link>
 
           {/* Desktop nav links */}
@@ -105,11 +98,8 @@ export function Navbar() {
               >
                 <SheetHeader className="border-b border-white/10 pb-4">
                   <div className="flex items-center justify-between">
-                    <SheetTitle className="flex items-center gap-2">
-                      <div className="flex items-center justify-center w-7 h-7 rounded bg-[#1E3A5F] border border-[#2D5A8E]/40">
-                        <ShieldCheckIcon className="size-3.5 text-[#60A5FA]" />
-                      </div>
-                      <span className="text-white font-bold text-lg">LVIS™</span>
+                    <SheetTitle className="flex items-center">
+                      <LvisLogoSimple width={80} className="text-white" />
                     </SheetTitle>
                     <button
                       onClick={() => setMobileOpen(false)}

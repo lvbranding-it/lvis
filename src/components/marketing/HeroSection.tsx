@@ -1,6 +1,9 @@
 import Link from 'next/link'
-import { ShieldCheckIcon, ArrowRightIcon, FileSearchIcon } from 'lucide-react'
+import { ArrowRightIcon, FileSearchIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { LvisLogoFull } from '@/components/brand/LvisLogoFull'
+import { QualitySeal } from '@/components/brand/QualitySeal'
+import { LVAuthenticityIndexLogo } from '@/components/brand/LVAuthenticityIndexLogo'
 
 function ForensicScoreCard() {
   const categories = [
@@ -53,12 +56,7 @@ function ForensicScoreCard() {
           <div className="flex items-center gap-4 mb-5 p-4 bg-[#060E1A] rounded-lg border border-white/5">
             <div className="relative flex items-center justify-center w-20 h-20 shrink-0">
               <svg className="w-20 h-20 -rotate-90" viewBox="0 0 80 80">
-                <circle
-                  cx="40" cy="40" r="34"
-                  fill="none"
-                  stroke="#1E3A5F"
-                  strokeWidth="6"
-                />
+                <circle cx="40" cy="40" r="34" fill="none" stroke="#1E3A5F" strokeWidth="6" />
                 <circle
                   cx="40" cy="40" r="34"
                   fill="none"
@@ -74,9 +72,9 @@ function ForensicScoreCard() {
               </div>
             </div>
             <div>
-              <p className="text-[#94A3B8] text-[10px] uppercase tracking-widest font-medium mb-1">
-                LV Authenticity Index™
-              </p>
+              <div className="mb-1">
+                <LVAuthenticityIndexLogo width={160} className="text-[#94A3B8]" />
+              </div>
               <p className="text-white text-sm font-semibold leading-tight">
                 Authentic Photograph
               </p>
@@ -147,9 +145,7 @@ export function HeroSection() {
       <div className="absolute inset-0 pointer-events-none">
         <div
           className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[600px] rounded-full opacity-10"
-          style={{
-            background: 'radial-gradient(ellipse at center, #1D4ED8 0%, transparent 70%)',
-          }}
+          style={{ background: 'radial-gradient(ellipse at center, #1D4ED8 0%, transparent 70%)' }}
         />
       </div>
 
@@ -158,20 +154,20 @@ export function HeroSection() {
           {/* Left: Text content */}
           <div className="text-center lg:text-left">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 bg-[#1E3A5F]/50 border border-[#2D5A8E]/40 rounded-full px-4 py-1.5 mb-8">
-              <ShieldCheckIcon className="size-3.5 text-[#60A5FA]" />
+            <div className="inline-flex items-center gap-3 bg-[#1E3A5F]/50 border border-[#2D5A8E]/40 rounded-full px-4 py-1.5 mb-8">
+              <QualitySeal size={24} sealColor="#1E3A5F" detailColor="#60A5FA" />
               <span className="text-[#93C5FD] text-xs font-medium tracking-wide">
                 Professional Forensic Photography Platform
               </span>
             </div>
 
-            {/* H1 */}
-            <h1 className="text-7xl md:text-9xl font-bold text-white tracking-tight leading-none mb-2">
-              LVIS™
-            </h1>
-            <p className="text-[#64748B] text-xl font-light tracking-wide mb-4">
-              Luis Velasquez Image Integrity System™
-            </p>
+            {/* Logo wordmark — replaces plain text H1 */}
+            <div className="mb-3 flex justify-center lg:justify-start">
+              <LvisLogoFull
+                width={320}
+                className="text-white"
+              />
+            </div>
 
             {/* Tagline */}
             <p className="text-white text-2xl italic mb-6">
@@ -180,7 +176,10 @@ export function HeroSection() {
 
             {/* Description */}
             <p className="text-[#94A3B8] text-base leading-relaxed max-w-2xl mx-auto lg:mx-0 mb-10">
-              LVIS™ delivers structured, evidence-based forensic analysis of photographic images. Using the proprietary <strong className="text-[#CBD5E1] font-medium">LV Authenticity Index™</strong>, every image is evaluated across five critical dimensions — provenance, file integrity, visual consistency, manipulation likelihood, and synthetic risk — producing a defensible risk score for professional and legal contexts.
+              LVIS™ delivers structured, evidence-based forensic analysis of photographic images. Using the proprietary{' '}
+              <strong className="text-[#CBD5E1] font-medium">LV Authenticity Index™</strong>, every image is evaluated
+              across five critical dimensions — provenance, file integrity, visual consistency, manipulation likelihood,
+              and synthetic risk — producing a defensible risk score for professional and legal contexts.
             </p>
 
             {/* CTA Buttons */}
