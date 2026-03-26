@@ -56,7 +56,7 @@ def analyze_exif(image_base64: str, file_type: str) -> ExifToolFindings:
     try:
         # Run ExifTool with full metadata extraction
         result = subprocess.run(
-            [_exiftool_bin(), "-json", "-G", "-struct", "-XMP:All", "-IPTC:All", tmp_path],
+            [_exiftool_bin(), "-json", "-G", "-struct", tmp_path],
             capture_output=True,
             text=True,
             timeout=30

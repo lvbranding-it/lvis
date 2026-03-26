@@ -1101,18 +1101,22 @@ export function LVISReportDocument(props: LVISReportDocumentProps) {
                 <Text style={s.metaSectionHeaderText}>File &amp; Color Profile</Text>
               </View>
               {[
-                { label: 'File Size', value: getExifField(exifDetails, 'File:FileSize', 'FileSize') },
+                { label: 'File Size', value: getExifField(exifDetails, 'File:FileSize', 'FileSize', 'System:FileSize') },
                 { label: 'Dimensions', value: (() => {
-                  const w = getExifField(exifDetails, 'EXIF:ImageWidth', 'ExifImageWidth', 'File:ImageWidth', 'ImageWidth')
-                  const h = getExifField(exifDetails, 'EXIF:ImageHeight', 'ExifImageHeight', 'File:ImageHeight', 'ImageHeight')
-                  return w !== '—' && h !== '—' ? `${w} × ${h}` : '—'
+                  const w = getExifField(exifDetails, 'EXIF:ImageWidth', 'EXIF:ExifImageWidth', 'ExifImageWidth', 'File:ImageWidth', 'ImageWidth')
+                  const h = getExifField(exifDetails, 'EXIF:ImageHeight', 'EXIF:ExifImageHeight', 'ExifImageHeight', 'File:ImageHeight', 'ImageHeight')
+                  if (w !== '—' && h !== '—') return `${w} × ${h}`
+                  // Fallback: Composite:ImageSize returns "W H" for JFIF JPEGs without EXIF
+                  const composite = getExifField(exifDetails, 'Composite:ImageSize', 'ImageSize')
+                  if (composite !== '—') return composite.replace(' ', ' × ')
+                  return '—'
                 })()},
-                { label: 'Color Space', value: getExifField(exifDetails, 'EXIF:ColorSpace', 'ColorSpace', 'ICC_Profile:ColorSpaceData') },
-                { label: 'ICC Profile', value: getExifField(exifDetails, 'ICC_Profile:ProfileDescription', 'ICC-Profile:ProfileDescription', 'ProfileDescription') },
-                { label: 'Bit Depth', value: getExifField(exifDetails, 'EXIF:BitsPerSample', 'BitsPerSample', 'File:BitsPerSample') },
-                { label: 'Compression', value: getExifField(exifDetails, 'EXIF:Compression', 'Compression', 'File:FileType') },
-                { label: 'Software', value: getExifField(exifDetails, 'EXIF:Software', 'Software') },
-                { label: 'Modify Date', value: getExifField(exifDetails, 'EXIF:ModifyDate', 'ModifyDate') },
+                { label: 'Color Space', value: getExifField(exifDetails, 'EXIF:ColorSpace', 'ColorSpace', 'ICC_Profile:ColorSpaceData', 'Composite:ColorSpace') },
+                { label: 'ICC Profile', value: getExifField(exifDetails, 'ICC_Profile:ProfileDescription', 'ICC-Profile:ProfileDescription', 'ProfileDescription', 'ICC_Profile:ProfileID') },
+                { label: 'Bit Depth', value: getExifField(exifDetails, 'EXIF:BitsPerSample', 'BitsPerSample', 'File:BitsPerSample', 'PNG:BitDepth') },
+                { label: 'Compression', value: getExifField(exifDetails, 'EXIF:Compression', 'Compression', 'File:FileType', 'JFIF:JFIFVersion') },
+                { label: 'Software', value: getExifField(exifDetails, 'EXIF:Software', 'Software', 'XMP:CreatorTool', 'XMP-xmp:CreatorTool') },
+                { label: 'Modify Date', value: getExifField(exifDetails, 'EXIF:ModifyDate', 'ModifyDate', 'File:FileModifyDate', 'XMP:ModifyDate') },
               ].map((row, i, arr) => (
                 <View key={row.label} style={[s.metaDataRow, i === arr.length - 1 ? { borderBottomWidth: 0 } : {}]}>
                   <Text style={s.metaDataLabel}>{row.label}</Text>
