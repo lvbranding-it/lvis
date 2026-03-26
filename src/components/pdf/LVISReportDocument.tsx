@@ -1409,8 +1409,8 @@ export function LVISReportDocument(props: LVISReportDocumentProps) {
               ) : (
                 <View style={{ width: 130, height: 1, backgroundColor: BORDER, marginBottom: 8 }} />
               )}
-              <Text style={s.signatureName}>Luis Velasquez</Text>
-              <Text style={s.signatureTitle}>LVIS™ Forensic Analysis Platform</Text>
+              <Text style={s.signatureName}>LVIS™ Forensic Analysis Platform</Text>
+              <Text style={s.signatureTitle}>Certified Digital Forensics Report</Text>
               <Text style={s.signatureDate}>{formattedDate}</Text>
             </View>
 
