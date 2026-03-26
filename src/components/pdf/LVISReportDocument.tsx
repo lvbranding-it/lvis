@@ -1029,7 +1029,10 @@ export function LVISReportDocument(props: LVISReportDocumentProps) {
         {/* Footer styled for dark bg */}
         <View style={[s.footer, { borderTopColor: '#1E3A5F' }]} fixed>
           <Text style={[s.footerText, { color: '#334155' }]}>LVIS™ Forensic Analysis Report — {caseNumber}</Text>
-          <Text style={[s.footerText, { color: '#334155' }]}>Page 1 of 6</Text>
+          <Text
+            style={[s.footerText, { color: '#334155' }]}
+            render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`}
+          />
         </View>
       </Page>
 
