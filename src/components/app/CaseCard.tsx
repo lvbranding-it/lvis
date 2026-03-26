@@ -1,13 +1,15 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { cn, formatDate } from '@/lib/utils'
 import { PRIORITY_COLORS, SCORE_BANDS } from '@/lib/constants'
 import { CaseStatusBadge } from '@/components/app/CaseStatusBadge'
 import type { Case } from '@/types'
-import { AlertTriangle, Clock } from 'lucide-react'
+import { AlertTriangle, Clock, FileImage } from 'lucide-react'
 
 interface CaseCardProps {
   case: Case
   className?: string
+  thumbnailUrl?: string
 }
 
 function getScoreBand(score: number) {
@@ -61,7 +63,7 @@ function ScoreCircle({ score }: { score: number }) {
   )
 }
 
-export function CaseCard({ case: c, className }: CaseCardProps) {
+export function CaseCard({ case: c, className, thumbnailUrl }: CaseCardProps) {
   const primaryFile = c.case_files?.[0]
   const review = c.forensic_review ?? null
   const score =
@@ -81,11 +83,23 @@ export function CaseCard({ case: c, className }: CaseCardProps) {
       )}
     >
       {/* Thumbnail */}
-      {primaryFile ? (
+      {thumbnailUrl ? (
+        <div className="relative h-36 w-full overflow-hidden rounded-t-xl bg-muted/40">
+          <Image
+            src={thumbnailUrl}
+            alt={primaryFile?.file_name ?? 'Case specimen'}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+          {/* Subtle dark gradient at the bottom for readability */}
+          <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-black/40 to-transparent" />
+        </div>
+      ) : primaryFile ? (
         <div className="flex h-36 items-center justify-center rounded-t-xl bg-muted/40">
           <div className="flex flex-col items-center gap-1 text-muted-foreground/40">
-            <AlertTriangle className="size-8" />
-            <span className="text-[10px]">{primaryFile.file_name}</span>
+            <FileImage className="size-8" />
+            <span className="text-[10px] font-mono">{primaryFile.file_name}</span>
           </div>
         </div>
       ) : (

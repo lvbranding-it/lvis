@@ -51,6 +51,32 @@ export default async function DashboardPage() {
     .order('created_at', { ascending: false })
     .limit(5)
 
+  // Batch-generate signed thumbnail URLs for all displayable primary files
+  const DISPLAYABLE_TYPES = new Set(['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'])
+  const thumbnailUrls: Record<string, string> = {}
+
+  if (recentCases && recentCases.length > 0) {
+    const entries: { caseId: string; path: string }[] = []
+    for (const c of recentCases) {
+      const primaryFile = c.case_files?.[0]
+      if (primaryFile?.storage_path && DISPLAYABLE_TYPES.has(primaryFile.file_type)) {
+        entries.push({ caseId: c.id, path: primaryFile.storage_path })
+      }
+    }
+    if (entries.length > 0) {
+      const { data: signedData } = await supabase.storage
+        .from('case-images')
+        .createSignedUrls(entries.map((e) => e.path), 3600)
+      if (signedData) {
+        for (let i = 0; i < entries.length; i++) {
+          if (signedData[i]?.signedUrl) {
+            thumbnailUrls[entries[i].caseId] = signedData[i].signedUrl
+          }
+        }
+      }
+    }
+  }
+
   const firstName = profile?.full_name?.split(' ')[0] ?? 'there'
 
   const stats = [
@@ -142,7 +168,7 @@ export default async function DashboardPage() {
         {recentCases && recentCases.length > 0 ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {recentCases.map((c) => (
-              <CaseCard key={c.id} case={c as Case} />
+              <CaseCard key={c.id} case={c as Case} thumbnailUrl={thumbnailUrls[c.id]} />
             ))}
           </div>
         ) : (
