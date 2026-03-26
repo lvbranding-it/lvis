@@ -823,15 +823,24 @@ function FindingsSection({
 }) {
   const color = scoreColor(data.score)
   return (
-    <View style={s.findingsCategory} wrap={false}>
-      <View style={s.findingsCategoryHeader}>
-        <Text style={s.findingsCategoryName}>{CategoryLabel(category)}</Text>
-        <View style={[s.findingsScorePill, { backgroundColor: color }]}>
-          <Text style={s.findingsScorePillText}>{data.score} / 100</Text>
+    // No wrap={false} on the outer card — allows the section to split across pages
+    // naturally instead of leaving large whitespace gaps when a card is too tall to fit.
+    <View style={s.findingsCategory}>
+      {/* Header + narrative kept together — prevents category title from stranding
+          alone at the bottom of a page without any body content beneath it. */}
+      <View wrap={false}>
+        <View style={s.findingsCategoryHeader}>
+          <Text style={s.findingsCategoryName}>{CategoryLabel(category)}</Text>
+          <View style={[s.findingsScorePill, { backgroundColor: color }]}>
+            <Text style={s.findingsScorePillText}>{data.score} / 100</Text>
+          </View>
+        </View>
+        <View style={[s.findingsCategoryBody, { paddingBottom: 0 }]}>
+          <Text style={s.narrativeText}>{data.narrative}</Text>
         </View>
       </View>
-      <View style={s.findingsCategoryBody}>
-        <Text style={s.narrativeText}>{data.narrative}</Text>
+      {/* Bullet points flow independently — they may continue onto the next page */}
+      <View style={{ paddingHorizontal: 14, paddingBottom: 14 }}>
         {data.findings.map((f, i) => (
           <View key={i} style={s.findingBulletRow}>
             <View style={s.findingBullet} />
@@ -1400,15 +1409,16 @@ export function LVISReportDocument(props: LVISReportDocumentProps) {
             </View>
           ) : null}
 
-          {/* Disclaimer + Signature kept together — wrap={false} prevents orphaned signature */}
-          <View wrap={false}>
-            <View style={s.disclaimerBox}>
-              <Text style={s.disclaimerLabel}>Legal Disclaimer</Text>
-              <Text style={s.disclaimerText}>{disclaimer}</Text>
-            </View>
+          {/* Disclaimer — flows naturally onto whatever page it reaches */}
+          <View style={s.disclaimerBox}>
+            <Text style={s.disclaimerLabel}>Legal Disclaimer</Text>
+            <Text style={s.disclaimerText}>{disclaimer}</Text>
+          </View>
 
-          {/* Signature block */}
-          <View style={s.signatureBlock}>
+          {/* Signature block — wrap={false} keeps the sig image, name, seal, and
+              case reference together as a single unit. The disclaimer above can flow,
+              but the signature itself never splits across pages. */}
+          <View style={s.signatureBlock} wrap={false}>
             {/* Left: signature image + name */}
             <View style={s.signatureLeft}>
               {hasSignature ? (
@@ -1429,7 +1439,6 @@ export function LVISReportDocument(props: LVISReportDocumentProps) {
               <Text style={{ fontSize: 7.5, color: MUTED, marginTop: 2, textAlign: 'right' }}>LV Authenticity Index™: {totalScore} / 100</Text>
             </View>
           </View>
-          </View>{/* end wrap={false} disclaimer+signature group */}
         </View>
 
         <PageFooter caseNumber={caseNumber} />
