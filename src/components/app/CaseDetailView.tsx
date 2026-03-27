@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CaseStatusBadge } from '@/components/app/CaseStatusBadge'
 import { AnalysisProgress } from '@/components/app/AnalysisProgress'
@@ -152,11 +152,6 @@ export function CaseDetailView({ caseData, metadata, isAdmin }: CaseDetailViewPr
             </>
           )}
 
-          {isAdmin && (
-            <Link href={`/app/admin/cases/${caseData.id}`} className={buttonVariants({ variant: 'outline', size: 'sm' })}>
-              Admin View
-            </Link>
-          )}
         </div>
       </div>
 
