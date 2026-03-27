@@ -74,6 +74,14 @@ const PLAN_PRODUCTS: Record<string, { name: string; amount: number }> = {
   enterprise: { name: 'LVIS™ Enterprise — Monthly Subscription', amount: 19900 },
 }
 
+/** Returns the Wave product ID for a tier from env vars (set via setup-wave-products.mjs). */
+function getProductId(tier: 'pro' | 'enterprise'): string {
+  const key = tier === 'pro' ? 'WAVE_PRODUCT_PRO_ID' : 'WAVE_PRODUCT_ENTERPRISE_ID'
+  const id = process.env[key]
+  if (!id) throw new Error(`${key} env var is not set — run scripts/setup-wave-products.mjs first`)
+  return id
+}
+
 /**
  * Create a Wave invoice, approve it, and return the invoice ID plus view URL
  * (the Wave payment / view link the customer uses to pay).
@@ -114,6 +122,7 @@ export async function waveCreateInvoice(
         memo: `Thank you for subscribing to LVIS™ ${tier.charAt(0).toUpperCase() + tier.slice(1)}.`,
         items: [
           {
+            productId: getProductId(tier),
             description: product.name,
             quantity: '1',
             unitPrice: (product.amount / 100).toFixed(2),
