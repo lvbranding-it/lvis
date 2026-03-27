@@ -74,12 +74,42 @@ const PLAN_PRODUCTS: Record<string, { name: string; amount: number }> = {
   enterprise: { name: 'LVIS™ Enterprise — Monthly Subscription', amount: 19900 },
 }
 
-/** Returns the Wave product ID for a tier from env vars (set via setup-wave-products.mjs). */
-function getProductId(tier: 'pro' | 'enterprise'): string {
-  const key = tier === 'pro' ? 'WAVE_PRODUCT_PRO_ID' : 'WAVE_PRODUCT_ENTERPRISE_ID'
-  const id = process.env[key]
-  if (!id) throw new Error(`${key} env var is not set — run scripts/setup-wave-products.mjs first`)
-  return id
+/**
+ * Resolve the Wave product ID for a tier.
+ * Prefers the env var (WAVE_PRODUCT_PRO_ID / WAVE_PRODUCT_ENTERPRISE_ID) for speed,
+ * falls back to querying the Wave products list and matching by name.
+ */
+async function resolveProductId(tier: 'pro' | 'enterprise'): Promise<string> {
+  const envKey = tier === 'pro' ? 'WAVE_PRODUCT_PRO_ID' : 'WAVE_PRODUCT_ENTERPRISE_ID'
+  const envId = process.env[envKey]
+  if (envId) return envId
+
+  // Fallback: fetch all products from Wave and match by name fragment
+  const nameFragment = tier === 'pro' ? 'Pro' : 'Enterprise'
+  const data = await waveQuery<{
+    business: { products: { edges: { node: { id: string; name: string } }[] } }
+  }>(
+    `query GetProducts($businessId: ID!) {
+      business(id: $businessId) {
+        products {
+          edges {
+            node { id name }
+          }
+        }
+      }
+    }`,
+    { businessId: getBusinessId() }
+  )
+  const products = data.business?.products?.edges ?? []
+  const match = products.find(({ node }) => node.name.includes(nameFragment))
+  if (!match) {
+    throw new Error(
+      `No Wave product found for tier "${tier}". ` +
+      `Run scripts/setup-wave-products.mjs to create it, ` +
+      `then set ${envKey} in Vercel env vars.`
+    )
+  }
+  return match.node.id
 }
 
 /**
@@ -94,6 +124,7 @@ export async function waveCreateInvoice(
   if (!product) throw new Error(`Unknown tier: ${tier}`)
 
   const today = new Date().toISOString().slice(0, 10) // YYYY-MM-DD
+  const productId = await resolveProductId(tier)
 
   // 1. Create invoice in DRAFT state
   const createData = await waveQuery<{
@@ -122,7 +153,7 @@ export async function waveCreateInvoice(
         memo: `Thank you for subscribing to LVIS™ ${tier.charAt(0).toUpperCase() + tier.slice(1)}.`,
         items: [
           {
-            productId: getProductId(tier),
+            productId,
             description: product.name,
             quantity: '1',
             unitPrice: (product.amount / 100).toFixed(2),
