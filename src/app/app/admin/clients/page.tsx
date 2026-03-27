@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import {
@@ -111,8 +112,10 @@ export default async function AdminClientsPage() {
                 return (
                   <TableRow key={client.id}>
                     <TableCell>
-                      <p className="text-xs font-medium">{client.full_name ?? '—'}</p>
-                      <p className="text-[10px] text-muted-foreground font-mono">{client.id.slice(0, 8)}…</p>
+                      <Link href={`/app/admin/clients/${client.id}`} className="group">
+                        <p className="text-xs font-medium group-hover:text-primary transition-colors">{client.full_name ?? '—'}</p>
+                        <p className="text-[10px] text-muted-foreground font-mono">{client.id.slice(0, 8)}…</p>
+                      </Link>
                     </TableCell>
                     <TableCell>
                       <span className="text-xs text-muted-foreground">

@@ -55,6 +55,8 @@ export interface LVISReportDocumentProps {
   elaMapBase64?: string | null
   /** Raw ExifTool metadata object for the Image Evidence page */
   exifDetails?: Record<string, unknown> | null
+  /** Optional expert note from admin — rendered as a highlighted callout on the summary page */
+  adminNote?: string | null
 }
 
 // ─── Colour helpers ──────────────────────────────────────────────────────────
@@ -874,6 +876,7 @@ export function LVISReportDocument(props: LVISReportDocumentProps) {
     specimenImageBase64,
     elaMapBase64,
     exifDetails,
+    adminNote,
   } = props
 
   // Derive all cover-page dynamic colours from the single getIndexColor() call
@@ -1307,6 +1310,18 @@ export function LVISReportDocument(props: LVISReportDocumentProps) {
         <SectionHeader title="Detailed Findings" />
 
         <View style={s.pageBody}>
+          {/* Admin / Forensic Expert Note — shown only when provided */}
+          {adminNote ? (
+            <View wrap={false} style={{ backgroundColor: '#FEF3C7', borderRadius: 6, padding: 12, marginBottom: 12, borderLeftWidth: 3, borderLeftColor: '#D97706' }}>
+              <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#92400E', marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                Forensic Expert Note
+              </Text>
+              <Text style={{ fontSize: 9, color: '#78350F', lineHeight: 1.5, fontStyle: 'italic' }}>
+                {adminNote}
+              </Text>
+            </View>
+          ) : null}
+
           {/* Overall observations — wrap={false} keeps label + body together */}
           {claudeFindings.overall_observations ? (
             <View style={s.observationsBox} wrap={false}>
