@@ -82,9 +82,9 @@ export function CaseCard({ case: c, className, thumbnailUrl }: CaseCardProps) {
         className
       )}
     >
-      {/* Thumbnail */}
+      {/* Thumbnail — 4:3 aspect ratio */}
       {thumbnailUrl ? (
-        <div className="relative h-36 w-full overflow-hidden rounded-t-xl bg-muted/40">
+        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-t-xl bg-muted/40">
           <Image
             src={thumbnailUrl}
             alt={primaryFile?.file_name ?? 'Case specimen'}
@@ -96,14 +96,14 @@ export function CaseCard({ case: c, className, thumbnailUrl }: CaseCardProps) {
           <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-black/40 to-transparent" />
         </div>
       ) : primaryFile ? (
-        <div className="flex h-36 items-center justify-center rounded-t-xl bg-muted/40">
+        <div className="flex aspect-[4/3] items-center justify-center rounded-t-xl bg-muted/40">
           <div className="flex flex-col items-center gap-1 text-muted-foreground/40">
             <FileImage className="size-8" />
             <span className="text-[10px] font-mono">{primaryFile.file_name}</span>
           </div>
         </div>
       ) : (
-        <div className="flex h-36 items-center justify-center rounded-t-xl bg-muted/40">
+        <div className="flex aspect-[4/3] items-center justify-center rounded-t-xl bg-muted/40">
           <div className="flex flex-col items-center gap-1 text-muted-foreground/40">
             <AlertTriangle className="size-8" />
             <span className="text-[10px]">No image</span>

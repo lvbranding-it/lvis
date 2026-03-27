@@ -125,9 +125,9 @@ export default async function DashboardPage() {
             Here&apos;s an overview of your image integrity cases.
           </p>
         </div>
-        <Link href="/app/cases/new" className={buttonVariants({ size: 'sm' }) + ' flex items-center gap-1.5'}>
+        <Link href="/app/cases/new" className={buttonVariants({ size: 'sm' }) + ' flex items-center gap-1.5 shrink-0'}>
           <FolderPlus className="size-4" />
-          New Case
+          <span className="hidden sm:inline">New Case</span>
         </Link>
       </div>
 

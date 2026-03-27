@@ -95,30 +95,30 @@ export function CaseDetailView({ caseData, metadata, isAdmin }: CaseDetailViewPr
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-start gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex items-start gap-3">
           <Link href="/app/cases">
-            <Button variant="ghost" size="sm" className="mt-0.5">
+            <Button variant="ghost" size="sm" className="mt-0.5 shrink-0">
               <ArrowLeft className="h-4 w-4 mr-1" />
               Cases
             </Button>
           </Link>
-          <div>
-            <div className="flex items-center gap-3 mb-1">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2 mb-1">
               <code className="text-sm font-mono text-muted-foreground">{caseData.case_number}</code>
               <CaseStatusBadge status={caseData.status} />
               <span className={`text-xs font-medium ${PRIORITY_COLORS[caseData.priority]}`}>
                 {caseData.priority.toUpperCase()}
               </span>
             </div>
-            <h1 className="text-2xl font-bold text-foreground">{caseData.title}</h1>
+            <h1 className="text-xl font-bold text-foreground sm:text-2xl">{caseData.title}</h1>
             {caseData.purpose && (
-              <p className="text-muted-foreground mt-1">{caseData.purpose}</p>
+              <p className="text-muted-foreground mt-1 text-sm">{caseData.purpose}</p>
             )}
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
+        <div className="flex flex-wrap items-center gap-2 sm:shrink-0 sm:justify-end">
           {/* Download — visible to anyone when report exists */}
           {reportExists && (
             <Button onClick={handleDownloadReport} disabled={isDownloading} variant="outline" size="sm">

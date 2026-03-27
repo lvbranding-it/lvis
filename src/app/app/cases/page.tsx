@@ -101,9 +101,9 @@ export default async function CasesPage({ searchParams }: CasesPageProps) {
             {statusFilter !== 'all' ? `· ${CASE_STATUS_LABELS[statusFilter] ?? statusFilter}` : ''}
           </p>
         </div>
-        <Link href="/app/cases/new" className={buttonVariants({ size: 'sm' }) + ' flex items-center gap-1.5'}>
+        <Link href="/app/cases/new" className={buttonVariants({ size: 'sm' }) + ' flex items-center gap-1.5 shrink-0'}>
           <FolderPlus className="size-4" />
-          New Case
+          <span className="hidden sm:inline">New Case</span>
         </Link>
       </div>
 
