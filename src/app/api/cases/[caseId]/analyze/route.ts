@@ -5,7 +5,7 @@ import { buildReportProps, generateAndStoreReport } from '@/lib/pdf/generator'
 import { sendReportReadyEmail } from '@/lib/email/resend'
 import sharp from 'sharp'
 import type { ClaudeFindings, TechnicalEvidence, CategoryScores, ForensicReview } from '@/types'
-import { RAW_EXTENSIONS } from '@/lib/constants'
+import { RAW_EXTENSIONS, TIER_LIMITS } from '@/lib/constants'
 
 export async function POST(
   request: NextRequest,
@@ -51,29 +51,56 @@ export async function POST(
   const caseFile = caseData.case_files?.[0]
   if (!caseFile) return Response.json({ error: 'No file uploaded for this case' }, { status: 400 })
 
-  // Check subscription tier limits
+  // ── Quota enforcement ──────────────────────────────────────────────────────
+  // Fetch profile (tier + admin override) and active subscription (billing period).
   const { data: profile } = await serviceClient
     .from('profiles')
-    .select('subscription_tier')
+    .select('subscription_tier, analyses_override')
     .eq('id', user.id)
     .single()
 
-  const tier = profile?.subscription_tier ?? 'free'
-  if (tier === 'free') {
-    const thirtyDaysAgo = new Date()
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-    const { count } = await serviceClient
+  const tier = (profile?.subscription_tier ?? 'free') as keyof typeof TIER_LIMITS
+
+  const { data: activeSub } = await serviceClient
+    .from('subscriptions')
+    .select('current_period_start, current_period_end')
+    .eq('user_id', user.id)
+    .eq('status', 'active')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single()
+
+  // Use the subscription's billing period start, or fall back to the 1st of the current month.
+  const periodStart = activeSub?.current_period_start ?? (() => {
+    const d = new Date()
+    d.setUTCDate(1); d.setUTCHours(0, 0, 0, 0)
+    return d.toISOString()
+  })()
+
+  // analyses_override (set by admin) takes priority over the tier limit.
+  const tierLimit = TIER_LIMITS[tier]?.analyses_per_month ?? 1
+  const effectiveLimit = profile?.analyses_override ?? tierLimit
+
+  if (effectiveLimit !== Infinity) {
+    // Count all analyses by this user in the current billing period via cases.client_id.
+    const { data: userCases } = await serviceClient
+      .from('cases')
+      .select('id')
+      .eq('client_id', user.id)
+    const caseIds = (userCases ?? []).map((c: { id: string }) => c.id)
+
+    const { count: usedCount } = await serviceClient
       .from('forensic_reviews')
       .select('id', { count: 'exact', head: true })
-      .eq('case_id', caseId)
-      .gte('created_at', thirtyDaysAgo.toISOString())
-    // Free tier: check if user already has an analysis this month
-    const { count: userCount } = await serviceClient
-      .from('forensic_reviews')
-      .select('forensic_reviews.id', { count: 'exact', head: true })
-      .gte('created_at', thirtyDaysAgo.toISOString())
-    if ((userCount ?? 0) >= 1) {
-      return Response.json({ error: 'Free tier limit reached. Upgrade to Pro for more analyses.' }, { status: 402 })
+      .in('case_id', caseIds.length > 0 ? caseIds : ['__none__'])
+      .gte('created_at', periodStart)
+
+    if ((usedCount ?? 0) >= effectiveLimit) {
+      const tierLabel = tier.charAt(0).toUpperCase() + tier.slice(1)
+      return Response.json(
+        { error: `${tierLabel} plan limit reached (${effectiveLimit} analysis${effectiveLimit !== 1 ? 'es' : ''}/month). Upgrade to continue.` },
+        { status: 402 }
+      )
     }
   }
 
@@ -257,6 +284,30 @@ export async function POST(
 
     // 6. Update case to completed
     await serviceClient.from('cases').update({ status: 'completed' }).eq('id', caseId)
+
+    // 6b. Increment usage_records for this billing period
+    void (async () => {
+      try {
+        const periodEnd = activeSub?.current_period_end ?? (() => {
+          const d = new Date(); d.setUTCMonth(d.getUTCMonth() + 1); d.setUTCDate(1); d.setUTCHours(0, 0, 0, 0); return d.toISOString()
+        })()
+        const { data: existing } = await serviceClient
+          .from('usage_records')
+          .select('analyses_used')
+          .eq('user_id', user.id)
+          .eq('period_start', periodStart)
+          .single()
+        await serviceClient.from('usage_records').upsert(
+          {
+            user_id: user.id,
+            period_start: periodStart,
+            period_end: periodEnd,
+            analyses_used: (existing?.analyses_used ?? 0) + 1,
+          },
+          { onConflict: 'user_id,period_start' }
+        )
+      } catch { /* non-fatal */ }
+    })()
 
     // 7. Generate PDF inline and email client (async — don't block the response)
     void (async () => {

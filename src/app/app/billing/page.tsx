@@ -74,15 +74,25 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
     .limit(1)
     .single()
 
-  // Count analyses this month
-  const thirtyDaysAgo = new Date()
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+  // Determine billing period start (subscription date or 1st of current month)
+  const periodStart = subscription?.current_period_start ?? (() => {
+    const d = new Date(); d.setUTCDate(1); d.setUTCHours(0, 0, 0, 0); return d.toISOString()
+  })()
 
-  const { count: analysesUsed } = await supabase
-    .from('forensic_reviews')
-    .select('id', { count: 'exact', head: true })
-    .eq('case_id', user.id)
-    .gte('created_at', thirtyDaysAgo.toISOString())
+  // Count analyses this billing period via cases join (correct filter: client_id = user.id)
+  const { data: userCases } = await supabase
+    .from('cases')
+    .select('id')
+    .eq('client_id', user.id)
+  const caseIds = (userCases ?? []).map((c: { id: string }) => c.id)
+
+  const { count: analysesUsed } = caseIds.length > 0
+    ? await supabase
+        .from('forensic_reviews')
+        .select('id', { count: 'exact', head: true })
+        .in('case_id', caseIds)
+        .gte('created_at', periodStart)
+    : { count: 0 }
 
   const currentTier = (profile?.subscription_tier ?? 'free') as keyof typeof TIER_LIMITS
   const tierConfig = TIER_FEATURES[currentTier]
@@ -165,7 +175,8 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
       {/* BillingClient — handles checkout + portal buttons */}
       <BillingClient
         currentTier={currentTier}
-        hasStripeCustomer={!!profile?.stripe_customer_id}
+        hasWaveCustomer={!!profile?.wave_customer_id}
+        pendingInvoiceUrl={subscription?.wave_invoice_id ? `/api/billing/invoice` : undefined}
       />
 
       {/* Feature comparison table */}

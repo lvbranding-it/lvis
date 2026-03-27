@@ -2,17 +2,17 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { CreditCard, Zap, Building2, Loader2 } from 'lucide-react'
+import { ExternalLink, Zap, Building2, Loader2, Mail } from 'lucide-react'
 import type { SubscriptionTier } from '@/types'
 
 interface BillingClientProps {
   currentTier: SubscriptionTier
-  hasStripeCustomer: boolean
+  hasWaveCustomer: boolean
+  pendingInvoiceUrl?: string
 }
 
-export function BillingClient({ currentTier, hasStripeCustomer }: BillingClientProps) {
+export function BillingClient({ currentTier, pendingInvoiceUrl }: BillingClientProps) {
   const [loadingCheckout, setLoadingCheckout] = useState<'pro' | 'enterprise' | null>(null)
-  const [loadingPortal, setLoadingPortal] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   async function handleCheckout(tier: 'pro' | 'enterprise') {
@@ -30,6 +30,7 @@ export function BillingClient({ currentTier, hasStripeCustomer }: BillingClientP
         return
       }
       if (data.url) {
+        // Redirect to Wave invoice payment page
         window.location.href = data.url
       }
     } catch {
@@ -39,33 +40,17 @@ export function BillingClient({ currentTier, hasStripeCustomer }: BillingClientP
     }
   }
 
-  async function handlePortal() {
-    setLoadingPortal(true)
-    setError(null)
-    try {
-      const res = await fetch('/api/billing/portal', {
-        method: 'POST',
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.error ?? 'Failed to open billing portal.')
-        return
-      }
-      if (data.url) {
-        window.location.href = data.url
-      }
-    } catch {
-      setError('Network error. Please try again.')
-    } finally {
-      setLoadingPortal(false)
-    }
-  }
-
   return (
     <div className="space-y-4">
       {error && (
         <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
           {error}
+        </div>
+      )}
+
+      {pendingInvoiceUrl && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-400">
+          Your invoice is awaiting payment. Complete your payment to activate your plan.
         </div>
       )}
 
@@ -91,15 +76,12 @@ export function BillingClient({ currentTier, hasStripeCustomer }: BillingClientP
               className="w-full"
               size="sm"
               onClick={() => handleCheckout('pro')}
-              disabled={loadingCheckout !== null || loadingPortal}
+              disabled={loadingCheckout !== null}
             >
               {loadingCheckout === 'pro' ? (
-                <>
-                  <Loader2 className="size-3.5 animate-spin" />
-                  Redirecting…
-                </>
+                <><Loader2 className="size-3.5 animate-spin" />Redirecting to invoice…</>
               ) : (
-                'Upgrade to Pro'
+                <><ExternalLink className="size-3.5" />Upgrade to Pro</>
               )}
             </Button>
           </div>
@@ -127,48 +109,35 @@ export function BillingClient({ currentTier, hasStripeCustomer }: BillingClientP
               className="w-full"
               size="sm"
               onClick={() => handleCheckout('enterprise')}
-              disabled={loadingCheckout !== null || loadingPortal}
+              disabled={loadingCheckout !== null}
             >
               {loadingCheckout === 'enterprise' ? (
-                <>
-                  <Loader2 className="size-3.5 animate-spin" />
-                  Redirecting…
-                </>
+                <><Loader2 className="size-3.5 animate-spin" />Redirecting to invoice…</>
               ) : (
-                'Upgrade to Enterprise'
+                <><ExternalLink className="size-3.5" />Upgrade to Enterprise</>
               )}
             </Button>
           </div>
         )}
 
-        {/* Manage billing — shown when they have a paying subscription */}
-        {(currentTier === 'pro' || currentTier === 'enterprise') && hasStripeCustomer && (
+        {/* Manage subscription (paid tiers) */}
+        {(currentTier === 'pro' || currentTier === 'enterprise') && (
           <div className="rounded-xl border bg-card p-5 shadow-sm space-y-4">
             <div className="flex items-center gap-2">
               <div className="rounded-lg bg-muted p-2">
-                <CreditCard className="size-4 text-muted-foreground" />
+                <Mail className="size-4 text-muted-foreground" />
               </div>
               <div>
-                <p className="font-semibold">Billing Portal</p>
-                <p className="text-xs text-muted-foreground">Manage invoices & payment methods</p>
+                <p className="font-semibold">Manage Subscription</p>
+                <p className="text-xs text-muted-foreground">Renewals, cancellations & invoices</p>
               </div>
             </div>
-            <Button
-              variant="outline"
-              className="w-full"
-              size="sm"
-              onClick={handlePortal}
-              disabled={loadingCheckout !== null || loadingPortal}
-            >
-              {loadingPortal ? (
-                <>
-                  <Loader2 className="size-3.5 animate-spin" />
-                  Opening portal…
-                </>
-              ) : (
-                'Manage Billing'
-              )}
-            </Button>
+            <p className="text-xs text-muted-foreground">
+              To modify or cancel your subscription, contact us at{' '}
+              <a href="mailto:support@thelvis.com" className="underline hover:text-foreground">
+                support@thelvis.com
+              </a>
+            </p>
           </div>
         )}
       </div>

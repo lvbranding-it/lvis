@@ -1,16 +1,11 @@
 import { NextRequest } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
-import { stripe, STRIPE_PRICES } from '@/lib/stripe/client'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { waveCreateCustomer, waveCreateInvoice } from '@/lib/wave/client'
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    return Response.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await request.json()
   const { tier } = body as { tier: 'pro' | 'enterprise' }
@@ -19,51 +14,57 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: 'Invalid tier. Must be "pro" or "enterprise".' }, { status: 400 })
   }
 
-  const priceKey = tier === 'pro' ? 'pro_monthly' : 'enterprise_monthly'
-  const priceId = STRIPE_PRICES[priceKey]
+  const serviceClient = createServiceClient()
 
-  if (!priceId) {
-    return Response.json({ error: 'Price not configured for this tier.' }, { status: 500 })
-  }
-
-  // Get profile for stripe_customer_id
-  const { data: profile, error: profileError } = await supabase
+  // Fetch profile for Wave customer ID + name
+  const { data: profile } = await serviceClient
     .from('profiles')
-    .select('stripe_customer_id, full_name')
+    .select('wave_customer_id, full_name')
     .eq('id', user.id)
     .single()
 
-  if (profileError) {
-    return Response.json({ error: 'Failed to load profile.' }, { status: 500 })
+  let waveCustomerId = profile?.wave_customer_id ?? null
+
+  // Create Wave customer if this is their first time
+  if (!waveCustomerId) {
+    try {
+      waveCustomerId = await waveCreateCustomer(
+        user.email ?? '',
+        profile?.full_name ?? user.email ?? 'LVIS Customer'
+      )
+      await serviceClient
+        .from('profiles')
+        .update({ wave_customer_id: waveCustomerId })
+        .eq('id', user.id)
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Unknown error'
+      return Response.json({ error: `Failed to create Wave customer: ${msg}` }, { status: 500 })
+    }
   }
 
-  let stripeCustomerId = profile?.stripe_customer_id
-
-  // Create Stripe customer if none exists
-  if (!stripeCustomerId) {
-    const customer = await stripe.customers.create({
-      email: user.email,
-      name: profile?.full_name ?? undefined,
-      metadata: { userId: user.id },
-    })
-    stripeCustomerId = customer.id
-
-    await supabase
-      .from('profiles')
-      .update({ stripe_customer_id: stripeCustomerId })
-      .eq('id', user.id)
+  // Create and approve a Wave invoice
+  let invoiceId: string
+  let viewUrl: string
+  try {
+    ;({ invoiceId, viewUrl } = await waveCreateInvoice(waveCustomerId, tier))
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Unknown error'
+    return Response.json({ error: `Failed to create Wave invoice: ${msg}` }, { status: 500 })
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? ''
+  // Store the pending invoice so we can match it when the webhook fires
+  await serviceClient.from('subscriptions').upsert(
+    {
+      user_id: user.id,
+      tier,
+      status: 'pending',
+      wave_customer_id: waveCustomerId,
+      wave_invoice_id: invoiceId,
+      cancel_at_period_end: false,
+    },
+    { onConflict: 'user_id' }
+  )
 
-  const session = await stripe.checkout.sessions.create({
-    mode: 'subscription',
-    line_items: [{ price: priceId, quantity: 1 }],
-    customer: stripeCustomerId,
-    success_url: `${appUrl}/app/billing?success=true`,
-    cancel_url: `${appUrl}/app/billing?canceled=true`,
-    metadata: { userId: user.id, tier },
-  })
-
-  return Response.json({ url: session.url })
+  // Return the Wave invoice URL — frontend redirects the customer there to pay
+  return Response.json({ url: viewUrl })
 }

@@ -2,10 +2,11 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { CaseCard } from '@/components/app/CaseCard'
+import { QuotaBanner } from '@/components/app/QuotaBanner'
 import { buttonVariants } from '@/components/ui/button-variants'
 import { FolderPlus, FolderOpen } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { CASE_STATUS_LABELS } from '@/lib/constants'
+import { CASE_STATUS_LABELS, TIER_LIMITS } from '@/lib/constants'
 import type { Case, CaseStatus } from '@/types'
 
 const STATUS_FILTERS = [
@@ -90,21 +91,78 @@ export default async function CasesPage({ searchParams }: CasesPageProps) {
     }
   }
 
+  // ── Quota computation ────────────────────────────────────────────────────
+  const { data: profileQuota } = await supabase
+    .from('profiles')
+    .select('subscription_tier, analyses_override')
+    .eq('id', user.id)
+    .single()
+
+  const { data: activeSub } = await supabase
+    .from('subscriptions')
+    .select('current_period_start')
+    .eq('user_id', user.id)
+    .eq('status', 'active')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single()
+
+  const tier = (profileQuota?.subscription_tier ?? 'free') as keyof typeof TIER_LIMITS
+  const tierLimit = TIER_LIMITS[tier]?.analyses_per_month ?? 1
+  const effectiveLimit = profileQuota?.analyses_override ?? tierLimit
+
+  const periodStart = activeSub?.current_period_start ?? (() => {
+    const d = new Date(); d.setUTCDate(1); d.setUTCHours(0, 0, 0, 0); return d.toISOString()
+  })()
+
+  // Count analyses this period
+  const allCaseIds = (cases ?? []).map((c) => c.id)
+  const { count: analysesUsed } = allCaseIds.length > 0
+    ? await serviceClient
+        .from('forensic_reviews')
+        .select('id', { count: 'exact', head: true })
+        .in('case_id', allCaseIds)
+        .gte('created_at', periodStart)
+    : { count: 0 }
+
+  const usedCount = analysesUsed ?? 0
+  const atLimit = effectiveLimit !== Infinity && usedCount >= effectiveLimit
+
   return (
     <div className="space-y-6">
+      {/* Quota banner — shown when limit is reached */}
+      {atLimit && effectiveLimit !== Infinity && (
+        <QuotaBanner used={usedCount} limit={effectiveLimit} tier={tier} />
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Cases</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">
             {cases?.length ?? 0} case{cases?.length !== 1 ? 's' : ''}{' '}
-            {statusFilter !== 'all' ? `· ${CASE_STATUS_LABELS[statusFilter] ?? statusFilter}` : ''}
+            {statusFilter !== 'all' ? `· ${CASE_STATUS_LABELS[statusFilter] ?? statusFilter}` : ''}{' '}
+            {effectiveLimit !== Infinity && (
+              <span className={cn('font-medium', atLimit ? 'text-amber-600 dark:text-amber-400' : '')}>
+                · {usedCount}/{effectiveLimit} analyses used
+              </span>
+            )}
           </p>
         </div>
-        <Link href="/app/cases/new" className={buttonVariants({ size: 'sm' }) + ' flex items-center gap-1.5 shrink-0'}>
-          <FolderPlus className="size-4" />
-          <span className="hidden sm:inline">New Case</span>
-        </Link>
+        {atLimit ? (
+          <span
+            className={cn(buttonVariants({ size: 'sm' }), 'flex items-center gap-1.5 shrink-0 opacity-40 cursor-not-allowed pointer-events-none')}
+            title="Monthly analysis limit reached. Upgrade to continue."
+          >
+            <FolderPlus className="size-4" />
+            <span className="hidden sm:inline">New Case</span>
+          </span>
+        ) : (
+          <Link href="/app/cases/new" className={buttonVariants({ size: 'sm' }) + ' flex items-center gap-1.5 shrink-0'}>
+            <FolderPlus className="size-4" />
+            <span className="hidden sm:inline">New Case</span>
+          </Link>
+        )}
       </div>
 
       {/* Filter tabs */}

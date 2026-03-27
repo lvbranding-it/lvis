@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import {
   Table,
   TableHeader,
@@ -10,36 +10,69 @@ import {
 } from '@/components/ui/table'
 import { formatDate } from '@/lib/utils'
 import { Users } from 'lucide-react'
+import { ClientTierControls } from '@/components/app/admin/ClientTierControls'
+import type { SubscriptionTier } from '@/types'
 
 interface ClientRow {
   id: string
   full_name: string | null
   company_name: string | null
-  subscription_tier: string
+  subscription_tier: SubscriptionTier
+  analyses_override: number | null
   created_at: string
   cases: { count: number }[]
 }
 
-const TIER_BADGE: Record<string, string> = {
-  free: 'bg-muted text-muted-foreground',
-  pro: 'bg-primary/10 text-primary',
-  enterprise: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
-}
-
 export default async function AdminClientsPage() {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
-  const { data: clients } = await supabase
+  const serviceClient = createServiceClient()
+
+  const { data: clients } = await serviceClient
     .from('profiles')
-    .select('*, cases(count)')
+    .select('id, full_name, company_name, subscription_tier, analyses_override, created_at, cases(count)')
     .eq('role', 'client')
     .order('created_at', { ascending: false })
 
   const rows = (clients ?? []) as ClientRow[]
+
+  // Determine billing period start (1st of current month as fallback)
+  const periodStart = (() => {
+    const d = new Date(); d.setUTCDate(1); d.setUTCHours(0, 0, 0, 0); return d.toISOString()
+  })()
+
+  // Batch-count analyses used this period for every client
+  const usageMap: Record<string, number> = {}
+  if (rows.length > 0) {
+    // Fetch all cases for these clients
+    const clientIds = rows.map((r) => r.id)
+    const { data: allCases } = await serviceClient
+      .from('cases')
+      .select('id, client_id')
+      .in('client_id', clientIds)
+
+    if (allCases && allCases.length > 0) {
+      const caseIds = allCases.map((c) => c.id)
+      const { data: reviews } = await serviceClient
+        .from('forensic_reviews')
+        .select('id, case_id')
+        .in('case_id', caseIds)
+        .gte('created_at', periodStart)
+
+      if (reviews) {
+        // Build case→client map
+        const caseClientMap: Record<string, string> = {}
+        for (const c of allCases) caseClientMap[c.id] = c.client_id
+        // Tally per client
+        for (const r of reviews) {
+          const cId = caseClientMap[r.case_id]
+          if (cId) usageMap[cId] = (usageMap[cId] ?? 0) + 1
+        }
+      }
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -65,7 +98,7 @@ export default async function AdminClientsPage() {
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Company</TableHead>
-                <TableHead>Plan</TableHead>
+                <TableHead>Plan · Usage · Override</TableHead>
                 <TableHead>Cases</TableHead>
                 <TableHead>Joined</TableHead>
               </TableRow>
@@ -73,8 +106,7 @@ export default async function AdminClientsPage() {
             <TableBody>
               {rows.map((client) => {
                 const caseCount = client.cases?.[0]?.count ?? 0
-                const tier = client.subscription_tier ?? 'free'
-                const badgeClass = TIER_BADGE[tier] ?? TIER_BADGE.free
+                const used = usageMap[client.id] ?? 0
 
                 return (
                   <TableRow key={client.id}>
@@ -88,11 +120,13 @@ export default async function AdminClientsPage() {
                       </span>
                     </TableCell>
                     <TableCell>
-                      <span
-                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${badgeClass}`}
-                      >
-                        {tier}
-                      </span>
+                      {/* Tier selector + usage badge + override input */}
+                      <ClientTierControls
+                        userId={client.id}
+                        currentTier={client.subscription_tier ?? 'free'}
+                        currentOverride={client.analyses_override ?? null}
+                        analysesUsed={used}
+                      />
                     </TableCell>
                     <TableCell>
                       <span className="text-xs tabular-nums">{caseCount}</span>

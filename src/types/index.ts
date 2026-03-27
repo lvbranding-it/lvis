@@ -7,7 +7,8 @@ export interface Profile {
   full_name: string | null
   role: UserRole
   subscription_tier: SubscriptionTier
-  stripe_customer_id: string | null
+  wave_customer_id: string | null
+  analyses_override: number | null
   company_name: string | null
   phone: string | null
   created_at: string
@@ -144,8 +145,8 @@ export interface Report {
 export interface Subscription {
   id: string
   user_id: string
-  stripe_subscription_id: string | null
-  stripe_price_id: string | null
+  wave_customer_id: string | null
+  wave_invoice_id: string | null
   tier: SubscriptionTier
   status: string
   current_period_start: string | null

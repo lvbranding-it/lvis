@@ -2,9 +2,11 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { CaseCard } from '@/components/app/CaseCard'
+import { QuotaBanner } from '@/components/app/QuotaBanner'
 import { buttonVariants } from '@/components/ui/button-variants'
 import { FolderPlus, FolderOpen, Clock, CheckCircle2, AlertCircle } from 'lucide-react'
-import { formatDate } from '@/lib/utils'
+import { cn, formatDate } from '@/lib/utils'
+import { TIER_LIMITS } from '@/lib/constants'
 import type { Case, CaseStatus } from '@/types'
 
 interface StatusCount {
@@ -80,6 +82,42 @@ export default async function DashboardPage() {
     }
   }
 
+  // ── Quota computation ────────────────────────────────────────────────────
+  const { data: activeSub } = await supabase
+    .from('subscriptions')
+    .select('current_period_start')
+    .eq('user_id', user.id)
+    .eq('status', 'active')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single()
+
+  const tier = (profile?.subscription_tier ?? 'free') as keyof typeof TIER_LIMITS
+  const tierLimit = TIER_LIMITS[tier]?.analyses_per_month ?? 1
+  const effectiveLimit = profile?.analyses_override ?? tierLimit
+
+  const periodStart = activeSub?.current_period_start ?? (() => {
+    const d = new Date(); d.setUTCDate(1); d.setUTCHours(0, 0, 0, 0); return d.toISOString()
+  })()
+
+  const allCaseIds = (recentCases ?? []).map((c) => c.id)
+  // Count analyses across ALL user cases (not just recent 5) for accurate quota
+  const { data: allUserCases } = await serviceClient
+    .from('cases')
+    .select('id')
+    .eq('client_id', user.id)
+  const allUserCaseIds = (allUserCases ?? []).map((c) => c.id)
+  const { count: analysesUsed } = allUserCaseIds.length > 0
+    ? await serviceClient
+        .from('forensic_reviews')
+        .select('id', { count: 'exact', head: true })
+        .in('case_id', allUserCaseIds)
+        .gte('created_at', periodStart)
+    : { count: 0 }
+
+  const usedCount = analysesUsed ?? 0
+  const atLimit = effectiveLimit !== Infinity && usedCount >= effectiveLimit
+
   const firstName = profile?.full_name?.split(' ')[0] ?? 'there'
 
   const stats = [
@@ -115,6 +153,11 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-8">
+      {/* Quota banner — shown when limit is reached */}
+      {atLimit && effectiveLimit !== Infinity && (
+        <QuotaBanner used={usedCount} limit={effectiveLimit} tier={tier} />
+      )}
+
       {/* Welcome header */}
       <div className="flex items-start justify-between gap-4">
         <div>
@@ -123,12 +166,27 @@ export default async function DashboardPage() {
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Here&apos;s an overview of your image integrity cases.
+            {effectiveLimit !== Infinity && (
+              <span className={cn('ml-1 font-medium', atLimit ? 'text-amber-600 dark:text-amber-400' : '')}>
+                · {usedCount}/{effectiveLimit} analyses used
+              </span>
+            )}
           </p>
         </div>
-        <Link href="/app/cases/new" className={buttonVariants({ size: 'sm' }) + ' flex items-center gap-1.5 shrink-0'}>
-          <FolderPlus className="size-4" />
-          <span className="hidden sm:inline">New Case</span>
-        </Link>
+        {atLimit ? (
+          <span
+            className={cn(buttonVariants({ size: 'sm' }), 'flex items-center gap-1.5 shrink-0 opacity-40 cursor-not-allowed pointer-events-none')}
+            title="Monthly analysis limit reached. Upgrade to continue."
+          >
+            <FolderPlus className="size-4" />
+            <span className="hidden sm:inline">New Case</span>
+          </span>
+        ) : (
+          <Link href="/app/cases/new" className={buttonVariants({ size: 'sm' }) + ' flex items-center gap-1.5 shrink-0'}>
+            <FolderPlus className="size-4" />
+            <span className="hidden sm:inline">New Case</span>
+          </Link>
+        )}
       </div>
 
       {/* Stats */}
