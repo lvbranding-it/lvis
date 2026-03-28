@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { AlertTriangle } from 'lucide-react'
+import { AlertTriangle, FileText, Zap } from 'lucide-react'
 
 interface QuotaBannerProps {
   used: number
@@ -21,12 +21,22 @@ export function QuotaBanner({ used, limit, tier }: QuotaBannerProps) {
         </p>
       </div>
       {tier === 'free' && (
-        <Link
-          href="/app/billing"
-          className="shrink-0 rounded-md bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-600"
-        >
-          Upgrade to Pro →
-        </Link>
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <Link
+            href="/app/billing?plan=unit"
+            className="inline-flex items-center gap-1.5 rounded-md border border-amber-400 bg-white px-3 py-1.5 text-xs font-semibold text-amber-700 transition-colors hover:bg-amber-50 dark:bg-transparent dark:text-amber-300 dark:hover:bg-amber-900/30"
+          >
+            <FileText className="size-3" />
+            Buy 1 Report — $9.99
+          </Link>
+          <Link
+            href="/app/billing"
+            className="inline-flex items-center gap-1.5 rounded-md bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-600"
+          >
+            <Zap className="size-3" />
+            Upgrade to Pro →
+          </Link>
+        </div>
       )}
     </div>
   )
