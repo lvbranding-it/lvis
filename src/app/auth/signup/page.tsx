@@ -98,15 +98,9 @@ export default function SignupPage() {
         />
 
         <div className="relative w-full max-w-md text-center">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#1E3A5F] border border-[#2D5A8E] mb-5 shadow-lg shadow-blue-950/40">
-            <Shield className="w-7 h-7 text-[#60A5FA]" />
+          <div className="flex justify-center mb-8">
+            <LvisLogoFull width={180} className="text-white" />
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-white mb-1">
-            LVIS<span className="text-[#60A5FA] text-lg align-super ml-0.5">™</span>
-          </h1>
-          <p className="text-sm font-medium tracking-widest text-[#64748B] uppercase mb-8">
-            LV Image Integrity System™
-          </p>
 
           <Card className="border border-[#1E293B] bg-[#0F1E33] shadow-2xl shadow-black/50">
             <CardContent className="pt-8 pb-8 flex flex-col items-center gap-4">
