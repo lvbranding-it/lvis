@@ -58,10 +58,23 @@ export function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-10 pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <LvisLogoSimpleInline />
-          <p className="text-[#334155] text-xs">
-            © 2026 Luis Velasquez. All rights reserved.
+        <div className="mt-10 pt-6 border-t border-white/5 space-y-3">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <LvisLogoSimpleInline />
+            <p className="text-[#334155] text-xs">
+              © 2026 Luis Velasquez. All rights reserved.
+            </p>
+          </div>
+          <p className="text-center text-[#334155] text-xs">
+            Powered by{' '}
+            <a
+              href="https://www.lvbranding.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-2 hover:text-[#64748B] transition-colors"
+            >
+              LV Branding
+            </a>
           </p>
         </div>
       </div>
