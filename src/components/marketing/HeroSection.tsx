@@ -95,14 +95,14 @@ export function HeroSection() {
             </div>
           </div>
 
-          {/* Right: hero image — fills column height, anchored to bottom */}
-          <div className="hidden lg:flex items-end justify-center h-full pb-0">
+          {/* Right: hero image — vertically centered, fills column */}
+          <div className="hidden lg:flex items-center justify-center h-full">
             <Image
               src="/marketing/lvis-hero.png"
               alt="LV Authenticity Index™ sample report"
-              width={900}
-              height={1125}
-              className="hero-image w-full max-h-[90vh] object-contain object-bottom"
+              width={1000}
+              height={1250}
+              className="hero-image w-full max-h-[82vh] object-contain"
               priority
             />
           </div>
