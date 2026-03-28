@@ -55,11 +55,11 @@ export function HeroSection() {
         />
       </div>
 
-      <div className="relative z-30 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+      <div className="relative z-30 w-full py-24">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.8fr] gap-8 lg:gap-0 items-center">
 
           {/* Left: Text content */}
-          <div className="text-center lg:text-left">
+          <div className="text-center lg:text-left px-4 sm:px-6 lg:pl-8 xl:pl-16 lg:pr-8">
             {/* Badge */}
             <div className="hero-badge inline-flex items-center gap-3 bg-[#1E3A5F]/50 border border-[#2D5A8E]/40 rounded-full px-4 py-1.5 mb-8">
               <QualitySeal size={24} sealColor="#1E3A5F" detailColor="#60A5FA" />
@@ -109,14 +109,14 @@ export function HeroSection() {
             </div>
           </div>
 
-          {/* Right: Hero image — fills column, no decorations */}
-          <div className="flex justify-center lg:justify-end">
+          {/* Right: Hero image — bleeds to the right edge */}
+          <div className="flex justify-center lg:justify-end lg:-mr-0">
             <Image
               src="/marketing/lvis-hero.png"
               alt="LV Authenticity Index™ sample report"
-              width={860}
-              height={1075}
-              className="hero-image w-full"
+              width={1100}
+              height={1375}
+              className="hero-image w-full lg:max-h-screen object-contain object-right"
               priority
             />
           </div>
