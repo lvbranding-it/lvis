@@ -21,7 +21,7 @@ interface ClientRow {
   subscription_tier: SubscriptionTier
   analyses_override: number | null
   created_at: string
-  cases: { count: number }[]
+  caseCount: number
 }
 
 // Tier monthly / per-use rates for invested estimate
@@ -53,16 +53,17 @@ export default async function AdminClientsPage() {
 
   const serviceClient = createServiceClient()
 
-  // Fetch all clients — keep select minimal so missing columns (pre-007) don't break the page
+  // Fetch all clients — no embedded relations to avoid PostgREST join failures
   const { data: clients, error: clientsError } = await serviceClient
     .from('profiles')
-    .select('id, full_name, company_name, subscription_tier, created_at, cases(count)')
+    .select('id, full_name, company_name, subscription_tier, created_at')
     .eq('role', 'client')
     .order('created_at', { ascending: false })
 
   if (clientsError) console.error('[admin/clients] profiles query error:', clientsError)
+  console.log(`[admin/clients] found ${clients?.length ?? 0} clients`)
 
-  // Fetch analyses_override separately so a missing column doesn't kill the whole page
+  // Fetch analyses_override separately (migration 007 may not be run yet)
   const overrideMap: Record<string, number | null> = {}
   try {
     const { data: overrides } = await serviceClient
@@ -70,12 +71,27 @@ export default async function AdminClientsPage() {
       .select('id, analyses_override')
       .eq('role', 'client')
     for (const o of overrides ?? []) overrideMap[o.id] = o.analyses_override ?? null
-  } catch { /* migration 007 not yet run — override stays null for all */ }
+  } catch { /* migration 007 not yet run */ }
 
-  const rows = (clients ?? []).map(c => ({
+  // Fetch case counts separately per client
+  const caseCountMap: Record<string, number> = {}
+  if ((clients ?? []).length > 0) {
+    const clientIds = (clients ?? []).map(c => c.id)
+    const { data: caseCounts } = await serviceClient
+      .from('cases')
+      .select('client_id')
+      .in('client_id', clientIds)
+    for (const c of caseCounts ?? []) {
+      caseCountMap[c.client_id] = (caseCountMap[c.client_id] ?? 0) + 1
+    }
+  }
+
+  const rows: ClientRow[] = (clients ?? []).map(c => ({
     ...c,
+    subscription_tier: (c.subscription_tier ?? 'free') as SubscriptionTier,
     analyses_override: overrideMap[c.id] ?? null,
-  })) as ClientRow[]
+    caseCount: caseCountMap[c.id] ?? 0,
+  }))
 
   // ── Last active from auth.users ──────────────────────────────────────────────
   const lastActiveMap: Record<string, string | null> = {}
@@ -167,7 +183,7 @@ export default async function AdminClientsPage() {
             </TableHeader>
             <TableBody>
               {rows.map((client) => {
-                const caseCount = client.cases?.[0]?.count ?? 0
+                const caseCount = client.caseCount
                 const usedMonth = monthAnalysesMap[client.id] ?? 0
                 const totalAnalyses = totalAnalysesMap[client.id] ?? 0
                 const lastActive = lastActiveMap[client.id]
