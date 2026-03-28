@@ -12,6 +12,7 @@ import {
   ChevronLeft,
   Loader2,
   CheckCircle2,
+  XCircle,
   UploadCloud,
   Brain,
   FileCheck,
@@ -303,55 +304,179 @@ export function NewCaseForm({ userTier = 'free' }: NewCaseFormProps) {
   }
 
   if (submitting && progressSteps.length > 0) {
+    const doneCount = progressSteps.filter(s => s.status === 'done').length
+    const hasError = progressSteps.some(s => s.status === 'error')
+    const allDone = doneCount === progressSteps.length
+    const progress = allDone ? 1 : hasError ? 0 : Math.min((doneCount + 0.5) / progressSteps.length, 0.95)
+    const pct = Math.round(progress * 100)
+    const r = 38
+    const circ = 2 * Math.PI * r
+    const offset = circ * (1 - progress)
+    const ringColor = hasError ? '#EF4444' : allDone ? '#22C55E' : '#3B82F6'
+
     return (
-      <div className="rounded-xl border bg-card p-8">
-        <h2 className="text-base font-semibold">Processing your case...</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Please keep this page open while we process your submission.
-        </p>
-        <div className="mt-6 space-y-4">
-          {progressSteps.map((step, i) => (
-            <div key={i} className="flex items-center gap-3">
-              <div
-                className={cn(
-                  'flex size-8 shrink-0 items-center justify-center rounded-full transition-colors',
-                  step.status === 'done'
-                    ? 'bg-green-500/20 text-green-500'
-                    : step.status === 'running'
-                    ? 'bg-primary/20 text-primary'
-                    : step.status === 'error'
-                    ? 'bg-destructive/20 text-destructive'
-                    : 'bg-muted text-muted-foreground'
-                )}
-              >
-                {step.status === 'running' ? (
-                  <Loader2 className="size-4 animate-spin" />
-                ) : step.status === 'done' ? (
-                  <CheckCircle2 className="size-4" />
-                ) : (
-                  step.icon
-                )}
-              </div>
-              <div className="flex-1">
-                <p
-                  className={cn(
-                    'text-sm font-medium',
-                    step.status === 'pending' ? 'text-muted-foreground' : 'text-foreground'
+      <>
+        <style>{`
+          @keyframes lvis-sub-scan {
+            0%   { transform: translateX(-100%); }
+            100% { transform: translateX(400%); }
+          }
+          @keyframes lvis-sub-pulse {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.4; }
+          }
+        `}</style>
+
+        <div className="rounded-xl border border-[#1E293B] bg-[#0A1628] overflow-hidden shadow-2xl shadow-black/40">
+
+          {/* Header */}
+          <div className="flex items-center gap-6 px-8 py-6 border-b border-[#1E293B]">
+            {/* Ring */}
+            <svg width="100" height="100" viewBox="0 0 100 100" className="shrink-0">
+              <circle cx="50" cy="50" r={r + 4} fill="none" stroke={ringColor} strokeWidth="1" opacity="0.12" />
+              <circle cx="50" cy="50" r={r} fill="none" stroke="#1E293B" strokeWidth="7" />
+              <circle
+                cx="50" cy="50" r={r}
+                fill="none"
+                stroke={ringColor}
+                strokeWidth="7"
+                strokeLinecap="round"
+                strokeDasharray={circ}
+                strokeDashoffset={offset}
+                transform="rotate(-90 50 50)"
+                style={{ transition: 'stroke-dashoffset 0.8s ease-out, stroke 0.4s ease' }}
+              />
+              <text x="50" y="46" textAnchor="middle" fill="#F8FAFC" fontSize="18" fontWeight="700" fontFamily="monospace">{pct}%</text>
+              <text x="50" y="61" textAnchor="middle" fill="#475569" fontSize="8" fontFamily="sans-serif" letterSpacing="1">COMPLETE</text>
+            </svg>
+
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-3 mb-1">
+                <span
+                  className={cn('inline-block w-2 h-2 rounded-full shrink-0',
+                    allDone ? 'bg-green-500' : hasError ? 'bg-red-500' : 'bg-blue-500'
                   )}
-                >
-                  {step.label}
-                </p>
+                  style={!allDone && !hasError ? { animation: 'lvis-sub-pulse 1.6s ease-in-out infinite' } : undefined}
+                />
+                <h3 className="text-base font-bold text-white tracking-tight">
+                  {allDone ? 'Case Submitted' : hasError ? 'Submission Error' : 'Preparing Your Case…'}
+                </h3>
               </div>
-              {step.status === 'done' && (
-                <span className="text-xs text-green-500 font-medium">Done</span>
-              )}
-              {step.status === 'error' && (
-                <span className="text-xs text-destructive font-medium">Error</span>
-              )}
+              <p className="text-xs text-[#64748B] leading-relaxed max-w-md">
+                {allDone
+                  ? 'Case created and queued — loading forensic pipeline…'
+                  : hasError
+                  ? 'An error occurred. Please try again.'
+                  : 'Building case record and initiating forensic analysis — do not close this page.'}
+              </p>
+              <div className="mt-3">
+                <span className="text-[10px] text-[#334155] font-mono uppercase tracking-widest">
+                  LVIS Forensic Pipeline v3
+                </span>
+              </div>
             </div>
-          ))}
+          </div>
+
+          {/* Step cards */}
+          <div className="grid grid-cols-3 divide-x divide-[#1E293B]">
+            {progressSteps.map((s, i) => {
+              const isActive  = s.status === 'running'
+              const isDone    = s.status === 'done'
+              const isError   = s.status === 'error'
+              const isPending = s.status === 'pending'
+
+              return (
+                <div
+                  key={i}
+                  className="relative overflow-hidden p-5"
+                  style={isActive ? { animation: 'lvis-sub-pulse 2s ease-in-out infinite' } : undefined}
+                >
+                  {/* Scan sweep */}
+                  {isActive && (
+                    <div
+                      className="absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-blue-500/15 to-transparent pointer-events-none"
+                      style={{ animation: 'lvis-sub-scan 2.2s ease-in-out infinite' }}
+                    />
+                  )}
+
+                  {/* Top border glow */}
+                  {isActive && <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-blue-500 to-transparent" />}
+                  {isDone   && <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-green-500 to-transparent" />}
+                  {isError  && <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-red-500 to-transparent" />}
+
+                  {/* Step number + icon */}
+                  <div className="flex items-center justify-between mb-3">
+                    <span className={cn(
+                      'text-[10px] font-mono font-bold tracking-widest',
+                      isDone    && 'text-green-500',
+                      isActive  && 'text-blue-400',
+                      isPending && 'text-[#334155]',
+                      isError   && 'text-red-500',
+                    )}>
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <div className={cn(
+                      'flex items-center justify-center w-7 h-7 rounded-md',
+                      isDone    && 'bg-green-500/15',
+                      isActive  && 'bg-blue-500/15',
+                      isPending && 'bg-[#1E293B]',
+                      isError   && 'bg-red-500/15',
+                    )}>
+                      {isDone   ? <CheckCircle2 className="w-4 h-4 text-green-500" />
+                      : isError  ? <XCircle      className="w-4 h-4 text-red-500" />
+                      : isActive ? <Loader2      className="w-4 h-4 text-blue-400 animate-spin" />
+                      : <span className={cn('w-4 h-4 flex items-center justify-center', isPending && 'text-[#334155]')}>{s.icon}</span>}
+                    </div>
+                  </div>
+
+                  {/* Label */}
+                  <p className={cn(
+                    'text-xs font-semibold leading-tight mb-1',
+                    isDone    && 'text-green-400',
+                    isActive  && 'text-white',
+                    isPending && 'text-[#475569]',
+                    isError   && 'text-red-400',
+                  )}>
+                    {s.label}
+                  </p>
+
+                  {/* Active pulsing dots */}
+                  {isActive && (
+                    <div className="flex items-center gap-1.5 mt-2">
+                      <span className="w-1 h-1 rounded-full bg-blue-500 animate-pulse" />
+                      <span className="w-1 h-1 rounded-full bg-blue-500 animate-pulse [animation-delay:0.2s]" />
+                      <span className="w-1 h-1 rounded-full bg-blue-500 animate-pulse [animation-delay:0.4s]" />
+                      <span className="text-[10px] text-blue-400 ml-0.5">Processing</span>
+                    </div>
+                  )}
+                  {isDone && (
+                    <span className="text-[10px] text-green-500 font-medium mt-1 block">Complete</span>
+                  )}
+                  {isError && (
+                    <span className="text-[10px] text-red-400 font-medium mt-1 block">Error</span>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+
+          {/* Bottom progress bar */}
+          <div className="h-1 w-full bg-[#1E293B]">
+            <div
+              className="h-full transition-all duration-700 ease-out"
+              style={{
+                width: `${pct}%`,
+                background: hasError
+                  ? '#EF4444'
+                  : allDone
+                  ? 'linear-gradient(90deg, #22C55E, #4ADE80)'
+                  : 'linear-gradient(90deg, #1D4ED8, #3B82F6, #60A5FA)',
+              }}
+            />
+          </div>
+
         </div>
-      </div>
+      </>
     )
   }
 
