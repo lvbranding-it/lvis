@@ -77,50 +77,47 @@ export function CaseCard({ case: c, className, thumbnailUrl }: CaseCardProps) {
     <Link
       href={`/app/cases/${c.id}`}
       className={cn(
-        'group flex flex-col rounded-xl border bg-card shadow-sm transition-all duration-200',
-        'hover:scale-[1.01] hover:shadow-md hover:border-primary/30',
+        'group flex flex-col rounded-xl border border-[#1E293B] bg-[#0F1E33] transition-all duration-200',
+        'hover:scale-[1.01] hover:border-blue-500/40 hover:shadow-lg hover:shadow-black/30',
         className
       )}
     >
-      {/* Thumbnail — 4:3 aspect ratio */}
+      {/* Thumbnail — 16:9 aspect ratio (shorter for 4-column grid) */}
       {thumbnailUrl ? (
-        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-t-xl bg-muted/40">
+        <div className="relative aspect-video w-full overflow-hidden rounded-t-xl bg-[#0A1628]">
           <Image
             src={thumbnailUrl}
             alt={primaryFile?.file_name ?? 'Case specimen'}
             fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
-          {/* Subtle dark gradient at the bottom for readability */}
-          <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-black/40 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-black/60 to-transparent" />
         </div>
       ) : primaryFile ? (
-        <div className="flex aspect-[4/3] items-center justify-center rounded-t-xl bg-muted/40">
-          <div className="flex flex-col items-center gap-1 text-muted-foreground/40">
-            <FileImage className="size-8" />
-            <span className="text-[10px] font-mono">{primaryFile.file_name}</span>
+        <div className="flex aspect-video items-center justify-center rounded-t-xl bg-[#0A1628]">
+          <div className="flex flex-col items-center gap-1 text-[#334155]">
+            <FileImage className="size-6" />
+            <span className="text-[10px] font-mono truncate max-w-[80%]">{primaryFile.file_name}</span>
           </div>
         </div>
       ) : (
-        <div className="flex aspect-[4/3] items-center justify-center rounded-t-xl bg-muted/40">
-          <div className="flex flex-col items-center gap-1 text-muted-foreground/40">
-            <AlertTriangle className="size-8" />
+        <div className="flex aspect-video items-center justify-center rounded-t-xl bg-[#0A1628]">
+          <div className="flex flex-col items-center gap-1 text-[#334155]">
+            <AlertTriangle className="size-6" />
             <span className="text-[10px]">No image</span>
           </div>
         </div>
       )}
 
       {/* Content */}
-      <div className="flex flex-1 flex-col gap-3 p-4">
+      <div className="flex flex-1 flex-col gap-2 p-3">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
-            {/* Case number */}
-            <p className="font-mono text-[10px] text-muted-foreground tracking-wider uppercase">
+            <p className="font-mono text-[10px] text-[#475569] tracking-wider uppercase">
               {c.case_number}
             </p>
-            {/* Title */}
-            <h3 className="mt-0.5 line-clamp-2 text-sm font-semibold leading-snug text-foreground">
+            <h3 className="mt-0.5 line-clamp-1 text-xs font-semibold leading-snug text-white">
               {c.title}
             </h3>
           </div>
@@ -135,7 +132,7 @@ export function CaseCard({ case: c, className, thumbnailUrl }: CaseCardProps) {
         </div>
 
         {/* Date */}
-        <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+        <div className="flex items-center gap-1.5 text-[10px] text-[#475569]">
           <Clock className="size-3" />
           <span>{formatDate(c.created_at)}</span>
         </div>

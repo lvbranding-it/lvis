@@ -96,23 +96,23 @@
 }
 
 .dark {
-  --background: oklch(0.09 0 0);
+  --background: oklch(0.10 0.04 245);   /* #0A1628 LVIS navy */
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
+  --card: oklch(0.14 0.05 245);         /* #0F1E33 LVIS card */
   --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
+  --popover: oklch(0.14 0.05 245);
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.3 0.15 240);
   --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.269 0 0);
+  --secondary: oklch(0.18 0.04 245);
   --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
+  --muted: oklch(0.18 0.04 245);        /* #1E293B ish */
+  --muted-foreground: oklch(0.60 0 0);
   --accent: oklch(0.55 0.18 240);
   --accent-foreground: oklch(0.99 0 0);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
+  --border: oklch(0.22 0.04 245 / 80%); /* #1E293B border */
+  --input: oklch(0.22 0.04 245);
   --ring: oklch(0.55 0.18 240);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);

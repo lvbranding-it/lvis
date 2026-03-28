@@ -218,9 +218,9 @@ export function AppShell({ profile, children }: AppShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <div className="dark flex h-screen overflow-hidden bg-[#060E1C]">
       {/* Desktop sidebar */}
-      <aside className="hidden w-64 shrink-0 flex-col border-r border-white/5 bg-[#0A1628] md:flex">
+      <aside className="hidden w-64 shrink-0 flex-col border-r border-[#1E293B] bg-[#0A1628] md:flex">
         <SidebarContent profile={profile} />
       </aside>
 
@@ -248,7 +248,7 @@ export function AppShell({ profile, children }: AppShellProps) {
       {/* Main content area */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Top header */}
-        <header className="flex h-14 shrink-0 items-center border-b bg-background px-4 md:px-6 gap-3">
+        <header className="flex h-14 shrink-0 items-center border-b border-[#1E293B] bg-[#0A1628] px-4 md:px-6 gap-3">
           {/* Mobile spacer for hamburger */}
           <div className="w-8 md:hidden" />
           <Breadcrumb />

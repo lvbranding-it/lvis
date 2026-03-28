@@ -71,35 +71,35 @@ function formatElapsed(secs: number): string {
 
 // SVG circular progress ring
 function ProgressRing({ progress, failed }: { progress: number; failed: boolean }) {
-  const r = 38
+  const r = 54
   const circ = 2 * Math.PI * r
   const offset = circ * (1 - Math.min(progress, 1))
   const color = failed ? '#EF4444' : progress >= 1 ? '#22C55E' : '#3B82F6'
   const pct = Math.round(Math.min(progress, 1) * 100)
 
   return (
-    <svg width="100" height="100" viewBox="0 0 100 100" className="shrink-0">
-      {/* Subtle glow ring */}
-      <circle cx="50" cy="50" r={r + 4} fill="none" stroke={color} strokeWidth="1" opacity="0.12" />
+    <svg width="140" height="140" viewBox="0 0 140 140" className="shrink-0">
+      {/* Outer glow ring */}
+      <circle cx="70" cy="70" r={r + 6} fill="none" stroke={color} strokeWidth="1" opacity="0.12" />
       {/* Track */}
-      <circle cx="50" cy="50" r={r} fill="none" stroke="#1E293B" strokeWidth="7" />
+      <circle cx="70" cy="70" r={r} fill="none" stroke="#1E293B" strokeWidth="8" />
       {/* Progress arc */}
       <circle
-        cx="50" cy="50" r={r}
+        cx="70" cy="70" r={r}
         fill="none"
         stroke={color}
-        strokeWidth="7"
+        strokeWidth="8"
         strokeLinecap="round"
         strokeDasharray={circ}
         strokeDashoffset={offset}
-        transform="rotate(-90 50 50)"
+        transform="rotate(-90 70 70)"
         style={{ transition: 'stroke-dashoffset 0.8s ease-out, stroke 0.4s ease' }}
       />
       {/* Percentage label */}
-      <text x="50" y="46" textAnchor="middle" fill="#F8FAFC" fontSize="18" fontWeight="700" fontFamily="monospace">
+      <text x="70" y="64" textAnchor="middle" fill="#F8FAFC" fontSize="26" fontWeight="700" fontFamily="monospace">
         {pct}%
       </text>
-      <text x="50" y="61" textAnchor="middle" fill="#475569" fontSize="8" fontFamily="sans-serif" letterSpacing="1">
+      <text x="70" y="82" textAnchor="middle" fill="#475569" fontSize="10" fontFamily="sans-serif" letterSpacing="2">
         COMPLETE
       </text>
     </svg>

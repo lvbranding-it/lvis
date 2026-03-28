@@ -135,17 +135,17 @@ export default async function CasesPage({ searchParams }: CasesPageProps) {
         <QuotaBanner used={usedCount} limit={effectiveLimit} tier={tier} />
       )}
 
-      {/* Sample report banner — free tier only, encourages upgrade by previewing report quality */}
+      {/* Sample report banner — free tier only */}
       {tier === 'free' && (
-        <div className="flex flex-wrap items-center gap-3 rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 dark:border-sky-900/40 dark:bg-sky-900/20">
-          <FileText className="size-4 shrink-0 text-sky-600 dark:text-sky-400" />
-          <p className="flex-1 text-sm text-sky-800 dark:text-sky-300">
+        <div className="flex flex-wrap items-center gap-3 rounded-lg border border-blue-500/20 bg-blue-500/5 px-4 py-3">
+          <FileText className="size-4 shrink-0 text-blue-400" />
+          <p className="flex-1 text-sm text-[#93C5FD]">
             Curious what a full forensic report looks like?{' '}
             <a
               href="/api/sample-report"
               target="_blank"
               rel="noopener noreferrer"
-              className="font-semibold underline underline-offset-2 hover:text-sky-900 dark:hover:text-sky-200 transition-colors"
+              className="font-semibold underline underline-offset-2 hover:text-white transition-colors"
             >
               View a sample report →
             </a>
@@ -184,7 +184,7 @@ export default async function CasesPage({ searchParams }: CasesPageProps) {
       </div>
 
       {/* Filter tabs */}
-      <div className="flex gap-1 overflow-x-auto rounded-lg border bg-muted/30 p-1">
+      <div className="flex gap-1 overflow-x-auto rounded-lg border border-[#1E293B] bg-[#0A1628] p-1">
         {STATUS_FILTERS.map((f) => (
           <Link
             key={f.value}
@@ -192,8 +192,8 @@ export default async function CasesPage({ searchParams }: CasesPageProps) {
             className={cn(
               'shrink-0 rounded-md px-3 py-1.5 text-xs font-medium transition-all',
               statusFilter === f.value
-                ? 'bg-background shadow-sm text-foreground'
-                : 'text-muted-foreground hover:text-foreground'
+                ? 'bg-[#1E293B] text-white shadow-sm'
+                : 'text-[#64748B] hover:text-white'
             )}
           >
             {f.label}
@@ -201,22 +201,22 @@ export default async function CasesPage({ searchParams }: CasesPageProps) {
         ))}
       </div>
 
-      {/* Cases grid */}
+      {/* Cases grid — 4 columns on large screens */}
       {cases && cases.length > 0 ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {cases.map((c) => (
             <CaseCard key={c.id} case={c as Case} thumbnailUrl={thumbnailUrls[c.id]} />
           ))}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed bg-muted/20 py-20 text-center">
-          <FolderOpen className="mb-3 size-10 text-muted-foreground/40" />
-          <h3 className="text-sm font-medium">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-[#1E293B] bg-[#0A1628]/50 py-20 text-center">
+          <FolderOpen className="mb-3 size-10 text-[#334155]" />
+          <h3 className="text-sm font-medium text-white">
             {statusFilter !== 'all'
               ? `No ${CASE_STATUS_LABELS[statusFilter] ?? statusFilter} cases`
               : 'No cases yet'}
           </h3>
-          <p className="mt-1 text-xs text-muted-foreground">
+          <p className="mt-1 text-xs text-[#64748B]">
             {statusFilter !== 'all'
               ? 'Try a different filter or submit a new case.'
               : 'Submit your first image for forensic analysis.'}

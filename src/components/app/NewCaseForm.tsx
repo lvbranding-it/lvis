@@ -309,7 +309,7 @@ export function NewCaseForm({ userTier = 'free' }: NewCaseFormProps) {
     const allDone = doneCount === progressSteps.length
     const progress = allDone ? 1 : hasError ? 0 : Math.min((doneCount + 0.5) / progressSteps.length, 0.95)
     const pct = Math.round(progress * 100)
-    const r = 38
+    const r = 54
     const circ = 2 * Math.PI * r
     const offset = circ * (1 - progress)
     const ringColor = hasError ? '#EF4444' : allDone ? '#22C55E' : '#3B82F6'
@@ -332,22 +332,22 @@ export function NewCaseForm({ userTier = 'free' }: NewCaseFormProps) {
           {/* Header */}
           <div className="flex items-center gap-6 px-8 py-6 border-b border-[#1E293B]">
             {/* Ring */}
-            <svg width="100" height="100" viewBox="0 0 100 100" className="shrink-0">
-              <circle cx="50" cy="50" r={r + 4} fill="none" stroke={ringColor} strokeWidth="1" opacity="0.12" />
-              <circle cx="50" cy="50" r={r} fill="none" stroke="#1E293B" strokeWidth="7" />
+            <svg width="140" height="140" viewBox="0 0 140 140" className="shrink-0">
+              <circle cx="70" cy="70" r={r + 6} fill="none" stroke={ringColor} strokeWidth="1" opacity="0.12" />
+              <circle cx="70" cy="70" r={r} fill="none" stroke="#1E293B" strokeWidth="8" />
               <circle
-                cx="50" cy="50" r={r}
+                cx="70" cy="70" r={r}
                 fill="none"
                 stroke={ringColor}
-                strokeWidth="7"
+                strokeWidth="8"
                 strokeLinecap="round"
                 strokeDasharray={circ}
                 strokeDashoffset={offset}
-                transform="rotate(-90 50 50)"
+                transform="rotate(-90 70 70)"
                 style={{ transition: 'stroke-dashoffset 0.8s ease-out, stroke 0.4s ease' }}
               />
-              <text x="50" y="46" textAnchor="middle" fill="#F8FAFC" fontSize="18" fontWeight="700" fontFamily="monospace">{pct}%</text>
-              <text x="50" y="61" textAnchor="middle" fill="#475569" fontSize="8" fontFamily="sans-serif" letterSpacing="1">COMPLETE</text>
+              <text x="70" y="64" textAnchor="middle" fill="#F8FAFC" fontSize="26" fontWeight="700" fontFamily="monospace">{pct}%</text>
+              <text x="70" y="82" textAnchor="middle" fill="#475569" fontSize="10" fontFamily="sans-serif" letterSpacing="2">COMPLETE</text>
             </svg>
 
             <div className="flex-1 min-w-0">
