@@ -102,7 +102,8 @@ export function HeroSection() {
               alt="LV Authenticity Index™ sample report"
               width={1000}
               height={1250}
-              className="hero-image h-[88vh] w-auto max-w-full object-contain"
+              className="hero-image object-contain"
+              style={{ height: '88vh', width: 'auto', maxWidth: '100%' }}
               priority
             />
           </div>
