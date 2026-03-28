@@ -53,14 +53,29 @@ export default async function AdminClientsPage() {
 
   const serviceClient = createServiceClient()
 
-  // Fetch all clients
-  const { data: clients } = await serviceClient
+  // Fetch all clients — keep select minimal so missing columns (pre-007) don't break the page
+  const { data: clients, error: clientsError } = await serviceClient
     .from('profiles')
-    .select('id, full_name, company_name, subscription_tier, analyses_override, created_at, cases(count)')
+    .select('id, full_name, company_name, subscription_tier, created_at, cases(count)')
     .eq('role', 'client')
     .order('created_at', { ascending: false })
 
-  const rows = (clients ?? []) as ClientRow[]
+  if (clientsError) console.error('[admin/clients] profiles query error:', clientsError)
+
+  // Fetch analyses_override separately so a missing column doesn't kill the whole page
+  const overrideMap: Record<string, number | null> = {}
+  try {
+    const { data: overrides } = await serviceClient
+      .from('profiles')
+      .select('id, analyses_override')
+      .eq('role', 'client')
+    for (const o of overrides ?? []) overrideMap[o.id] = o.analyses_override ?? null
+  } catch { /* migration 007 not yet run — override stays null for all */ }
+
+  const rows = (clients ?? []).map(c => ({
+    ...c,
+    analyses_override: overrideMap[c.id] ?? null,
+  })) as ClientRow[]
 
   // ── Last active from auth.users ──────────────────────────────────────────────
   const lastActiveMap: Record<string, string | null> = {}
