@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
 import { NextRequest } from 'next/server'
-import { TIER_LIMITS } from '@/lib/constants'
+import { TIER_LIMITS, ALLOWED_PRIORITIES } from '@/lib/constants'
 
 const createCaseSchema = z.object({
   title: z.string().min(3).max(200),
@@ -36,6 +36,16 @@ export async function POST(request: NextRequest) {
     .single()
 
   const tier = (profile?.subscription_tier ?? 'free') as keyof typeof TIER_LIMITS
+
+  // Priority guard: free users may not submit high/urgent priority cases
+  const allowedPriorities = ALLOWED_PRIORITIES[tier] ?? ALLOWED_PRIORITIES.free
+  if (!allowedPriorities.includes(parsed.data.priority)) {
+    return Response.json(
+      { error: 'High and Urgent priority are available on paid plans. Upgrade at /app/billing.' },
+      { status: 403 }
+    )
+  }
+
   const limit = TIER_LIMITS[tier]?.analyses_per_month ?? 1
 
   if (limit !== Infinity) {

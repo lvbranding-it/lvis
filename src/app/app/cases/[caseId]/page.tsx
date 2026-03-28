@@ -40,7 +40,7 @@ export default async function CaseDetailPage({ params }: Props) {
   // Ensure user owns the case or is admin
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role')
+    .select('role, subscription_tier')
     .eq('id', user.id)
     .single()
 
@@ -48,6 +48,8 @@ export default async function CaseDetailPage({ params }: Props) {
   if (!isAdmin && caseData.client_id !== user.id) {
     redirect('/app/dashboard')
   }
+
+  const userTier = (profile?.subscription_tier ?? 'free') as import('@/types').SubscriptionTier
 
   // Get metadata if available
   const caseFile = caseData.case_files?.[0]
@@ -66,6 +68,7 @@ export default async function CaseDetailPage({ params }: Props) {
       caseData={caseData as any}
       metadata={metadata}
       isAdmin={isAdmin}
+      userTier={userTier}
     />
   )
 }

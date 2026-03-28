@@ -15,10 +15,19 @@ export const SCORE_BANDS = [
 ] as const
 
 export const TIER_LIMITS = {
-  free: { analyses_per_month: 1, pdf_branded: false },
-  pro: { analyses_per_month: 10, pdf_branded: true },
-  enterprise: { analyses_per_month: Infinity, pdf_branded: true },
+  free:       { analyses_per_month: 1,        pdf_branded: false },
+  unit:       { analyses_per_month: 0,        pdf_branded: true  }, // credits tracked in profiles.analysis_credits
+  pro:        { analyses_per_month: 10,       pdf_branded: true  },
+  enterprise: { analyses_per_month: Infinity, pdf_branded: true  },
 } as const
+
+// Priorities available per tier (free is restricted to Low/Normal)
+export const ALLOWED_PRIORITIES: Record<string, string[]> = {
+  free:       ['low', 'normal'],
+  unit:       ['low', 'normal', 'high', 'urgent'],
+  pro:        ['low', 'normal', 'high', 'urgent'],
+  enterprise: ['low', 'normal', 'high', 'urgent'],
+}
 
 export const CASE_STATUS_LABELS: Record<string, string> = {
   pending: 'Pending Review',

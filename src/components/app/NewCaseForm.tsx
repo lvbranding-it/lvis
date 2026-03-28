@@ -16,7 +16,10 @@ import {
   Brain,
   FileCheck,
 } from 'lucide-react'
-import type { CasePriority } from '@/types'
+import { Lock } from 'lucide-react'
+import Link from 'next/link'
+import type { CasePriority, SubscriptionTier } from '@/types'
+import { ALLOWED_PRIORITIES } from '@/lib/constants'
 
 interface StepIndicatorProps {
   currentStep: number
@@ -125,7 +128,11 @@ function FieldGroup({ label, required, children, hint }: FieldGroupProps) {
   )
 }
 
-export function NewCaseForm() {
+interface NewCaseFormProps {
+  userTier?: SubscriptionTier
+}
+
+export function NewCaseForm({ userTier = 'free' }: NewCaseFormProps) {
   const router = useRouter()
   const [step, setStep] = useState(1)
   const [formData, setFormData] = useState<FormData>({
@@ -384,22 +391,40 @@ export function NewCaseForm() {
 
           <FieldGroup label="Priority">
             <div className="flex gap-2">
-              {PRIORITY_OPTIONS.map((o) => (
-                <button
-                  key={o.value}
-                  type="button"
-                  onClick={() => setField('priority', o.value)}
-                  className={cn(
-                    'flex-1 rounded-lg border px-2 py-1.5 text-xs font-medium transition-all',
-                    formData.priority === o.value
-                      ? 'border-primary bg-primary text-primary-foreground'
-                      : 'border-border bg-muted/20 text-muted-foreground hover:border-primary/50 hover:text-foreground'
-                  )}
-                >
-                  {o.label}
-                </button>
-              ))}
+              {PRIORITY_OPTIONS.map((o) => {
+                const allowed = (ALLOWED_PRIORITIES[userTier] ?? ALLOWED_PRIORITIES.free).includes(o.value)
+                return (
+                  <button
+                    key={o.value}
+                    type="button"
+                    onClick={() => allowed && setField('priority', o.value)}
+                    disabled={!allowed}
+                    title={!allowed ? 'Available on paid plans — upgrade at Billing' : undefined}
+                    className={cn(
+                      'flex-1 rounded-lg border px-2 py-1.5 text-xs font-medium transition-all',
+                      !allowed
+                        ? 'border-border bg-muted/10 text-muted-foreground/40 cursor-not-allowed opacity-50'
+                        : formData.priority === o.value
+                        ? 'border-primary bg-primary text-primary-foreground'
+                        : 'border-border bg-muted/20 text-muted-foreground hover:border-primary/50 hover:text-foreground'
+                    )}
+                  >
+                    <span className="flex items-center justify-center gap-1">
+                      {!allowed && <Lock className="size-2.5" />}
+                      {o.label}
+                    </span>
+                  </button>
+                )
+              })}
             </div>
+            {userTier === 'free' && (
+              <p className="text-xs text-muted-foreground mt-1">
+                High &amp; Urgent priority available on paid plans.{' '}
+                <Link href="/app/billing" className="underline hover:text-foreground">
+                  Upgrade
+                </Link>
+              </p>
+            )}
           </FieldGroup>
 
           <FieldGroup label="Description" hint="Context about the image or situation (optional)">

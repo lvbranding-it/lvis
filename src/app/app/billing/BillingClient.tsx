@@ -1,21 +1,30 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { ExternalLink, Zap, Building2, Loader2, Mail } from 'lucide-react'
+import { ExternalLink, Zap, Building2, Loader2, Mail, FileText } from 'lucide-react'
 import type { SubscriptionTier } from '@/types'
 
 interface BillingClientProps {
   currentTier: SubscriptionTier
   hasWaveCustomer: boolean
   pendingInvoiceUrl?: string
+  highlightPlan?: string
 }
 
-export function BillingClient({ currentTier, pendingInvoiceUrl }: BillingClientProps) {
-  const [loadingCheckout, setLoadingCheckout] = useState<'pro' | 'enterprise' | null>(null)
+export function BillingClient({ currentTier, pendingInvoiceUrl, highlightPlan }: BillingClientProps) {
+  const [loadingCheckout, setLoadingCheckout] = useState<'unit' | 'pro' | 'enterprise' | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const unitCardRef = useRef<HTMLDivElement>(null)
 
-  async function handleCheckout(tier: 'pro' | 'enterprise') {
+  // Auto-scroll to highlighted plan when arriving via deep link (?plan=unit)
+  useEffect(() => {
+    if (highlightPlan === 'unit' && unitCardRef.current) {
+      unitCardRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }, [highlightPlan])
+
+  async function handleCheckout(tier: 'unit' | 'pro' | 'enterprise') {
     setLoadingCheckout(tier)
     setError(null)
     try {
@@ -55,6 +64,54 @@ export function BillingClient({ currentTier, pendingInvoiceUrl }: BillingClientP
       )}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {/* By Unit plan card — always visible unless already on a higher tier */}
+        {currentTier !== 'pro' && currentTier !== 'enterprise' && (
+          <div
+            ref={unitCardRef}
+            className={`relative rounded-xl bg-card p-5 shadow-sm space-y-4 transition-all ${
+              highlightPlan === 'unit'
+                ? 'border-2 border-amber-400 ring-2 ring-amber-400/20'
+                : 'border-2 border-amber-400/30'
+            }`}
+          >
+            {highlightPlan === 'unit' && (
+              <div className="absolute -top-2.5 left-1/2 -translate-x-1/2">
+                <span className="rounded-full bg-amber-500 px-2.5 py-0.5 text-xs font-semibold text-white">
+                  Recommended
+                </span>
+              </div>
+            )}
+            <div className="flex items-center gap-2">
+              <div className="rounded-lg bg-amber-500/10 p-2">
+                <FileText className="size-4 text-amber-500" />
+              </div>
+              <div>
+                <p className="font-semibold">By Unit</p>
+                <p className="text-xs text-muted-foreground">$9.99 / report</p>
+              </div>
+            </div>
+            <ul className="space-y-1.5 text-xs text-muted-foreground">
+              <li>1 analysis credit</li>
+              <li>All priority levels</li>
+              <li>Branded PDF report</li>
+              <li>Credit never expires</li>
+            </ul>
+            <Button
+              variant="outline"
+              className="w-full border-amber-400/50 hover:border-amber-400"
+              size="sm"
+              onClick={() => handleCheckout('unit')}
+              disabled={loadingCheckout !== null}
+            >
+              {loadingCheckout === 'unit' ? (
+                <><Loader2 className="size-3.5 animate-spin" />Redirecting to invoice…</>
+              ) : (
+                <><ExternalLink className="size-3.5" />Buy 1 Report</>
+              )}
+            </Button>
+          </div>
+        )}
+
         {/* Pro plan card */}
         {currentTier !== 'pro' && currentTier !== 'enterprise' && (
           <div className="relative rounded-xl border-2 border-primary/30 bg-card p-5 shadow-sm space-y-4">
@@ -120,7 +177,38 @@ export function BillingClient({ currentTier, pendingInvoiceUrl }: BillingClientP
           </div>
         )}
 
-        {/* Manage subscription (paid tiers) */}
+        {/* Unit tier: allow buying more credits; also show manage */}
+        {currentTier === 'unit' && (
+          <div className="relative rounded-xl border-2 border-amber-400/30 bg-card p-5 shadow-sm space-y-4">
+            <div className="flex items-center gap-2">
+              <div className="rounded-lg bg-amber-500/10 p-2">
+                <FileText className="size-4 text-amber-500" />
+              </div>
+              <div>
+                <p className="font-semibold">Buy More Credits</p>
+                <p className="text-xs text-muted-foreground">$9.99 per report</p>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Each purchase adds 1 analysis credit that never expires.
+            </p>
+            <Button
+              variant="outline"
+              className="w-full border-amber-400/50 hover:border-amber-400"
+              size="sm"
+              onClick={() => handleCheckout('unit')}
+              disabled={loadingCheckout !== null}
+            >
+              {loadingCheckout === 'unit' ? (
+                <><Loader2 className="size-3.5 animate-spin" />Redirecting to invoice…</>
+              ) : (
+                <><ExternalLink className="size-3.5" />Buy 1 More Credit</>
+              )}
+            </Button>
+          </div>
+        )}
+
+        {/* Manage subscription (pro/enterprise tiers) */}
         {(currentTier === 'pro' || currentTier === 'enterprise') && (
           <div className="rounded-xl border bg-card p-5 shadow-sm space-y-4">
             <div className="flex items-center gap-2">

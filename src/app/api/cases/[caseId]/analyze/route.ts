@@ -52,14 +52,30 @@ export async function POST(
   if (!caseFile) return Response.json({ error: 'No file uploaded for this case' }, { status: 400 })
 
   // ── Quota enforcement ──────────────────────────────────────────────────────
-  // Fetch profile (tier + admin override) and active subscription (billing period).
+  // Fetch profile (tier + admin override + credits) and active subscription (billing period).
   const { data: profile } = await serviceClient
     .from('profiles')
-    .select('subscription_tier, analyses_override')
+    .select('subscription_tier, analyses_override, analysis_credits')
     .eq('id', user.id)
     .single()
 
   const tier = (profile?.subscription_tier ?? 'free') as keyof typeof TIER_LIMITS
+
+  // Unit-plan users consume pre-purchased credits instead of a monthly quota
+  if (tier === 'unit') {
+    const credits = profile?.analysis_credits ?? 0
+    if (credits < 1) {
+      return Response.json(
+        { error: 'No analysis credits remaining. Purchase a credit to continue.' },
+        { status: 402 }
+      )
+    }
+    // Deduct 1 credit before analysis starts
+    await serviceClient
+      .from('profiles')
+      .update({ analysis_credits: credits - 1 })
+      .eq('id', user.id)
+  }
 
   const { data: activeSub } = await serviceClient
     .from('subscriptions')
@@ -77,30 +93,33 @@ export async function POST(
     return d.toISOString()
   })()
 
-  // analyses_override (set by admin) takes priority over the tier limit.
-  const tierLimit = TIER_LIMITS[tier]?.analyses_per_month ?? 1
-  const effectiveLimit = profile?.analyses_override ?? tierLimit
+  // Monthly quota only applies to free / pro / enterprise (not unit)
+  if (tier !== 'unit') {
+    // analyses_override (set by admin) takes priority over the tier limit.
+    const tierLimit = TIER_LIMITS[tier]?.analyses_per_month ?? 1
+    const effectiveLimit = profile?.analyses_override ?? tierLimit
 
-  if (effectiveLimit !== Infinity) {
-    // Count all analyses by this user in the current billing period via cases.client_id.
-    const { data: userCases } = await serviceClient
-      .from('cases')
-      .select('id')
-      .eq('client_id', user.id)
-    const caseIds = (userCases ?? []).map((c: { id: string }) => c.id)
+    if (effectiveLimit !== Infinity) {
+      // Count all analyses by this user in the current billing period via cases.client_id.
+      const { data: userCases } = await serviceClient
+        .from('cases')
+        .select('id')
+        .eq('client_id', user.id)
+      const caseIds = (userCases ?? []).map((c: { id: string }) => c.id)
 
-    const { count: usedCount } = await serviceClient
-      .from('forensic_reviews')
-      .select('id', { count: 'exact', head: true })
-      .in('case_id', caseIds.length > 0 ? caseIds : ['__none__'])
-      .gte('created_at', periodStart)
+      const { count: usedCount } = await serviceClient
+        .from('forensic_reviews')
+        .select('id', { count: 'exact', head: true })
+        .in('case_id', caseIds.length > 0 ? caseIds : ['__none__'])
+        .gte('created_at', periodStart)
 
-    if ((usedCount ?? 0) >= effectiveLimit) {
-      const tierLabel = tier.charAt(0).toUpperCase() + tier.slice(1)
-      return Response.json(
-        { error: `${tierLabel} plan limit reached (${effectiveLimit} analysis${effectiveLimit !== 1 ? 'es' : ''}/month). Upgrade to continue.` },
-        { status: 402 }
-      )
+      if ((usedCount ?? 0) >= effectiveLimit) {
+        const tierLabel = tier.charAt(0).toUpperCase() + tier.slice(1)
+        return Response.json(
+          { error: `${tierLabel} plan limit reached (${effectiveLimit} analysis${effectiveLimit !== 1 ? 'es' : ''}/month). Upgrade to continue.` },
+          { status: 402 }
+        )
+      }
     }
   }
 

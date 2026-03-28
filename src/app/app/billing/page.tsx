@@ -5,7 +5,7 @@ import { TIER_LIMITS } from '@/lib/constants'
 import type { Profile, Subscription } from '@/types'
 
 interface BillingPageProps {
-  searchParams: Promise<{ success?: string; canceled?: string }>
+  searchParams: Promise<{ success?: string; canceled?: string; plan?: string }>
 }
 
 const TIER_FEATURES = {
@@ -17,8 +17,23 @@ const TIER_FEATURES = {
     badgeClass: 'bg-muted text-muted-foreground',
     features: [
       '1 analysis per month',
-      'Standard report (unbranded)',
+      'Score & classification preview',
+      'Low & Normal priority only',
       'Email support',
+    ],
+  },
+  unit: {
+    label: 'By Unit',
+    price: '$9.99',
+    period: 'per report',
+    color: 'text-amber-600 dark:text-amber-400',
+    badgeClass: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
+    features: [
+      '1 analysis credit',
+      'All priority levels',
+      'Branded PDF report',
+      'Full score breakdown',
+      'Credit never expires',
     ],
   },
   pro: {
@@ -29,6 +44,7 @@ const TIER_FEATURES = {
     badgeClass: 'bg-primary/10 text-primary',
     features: [
       '10 analyses per month',
+      'All priority levels',
       'Branded PDF reports',
       'Priority email support',
       'Full score breakdown',
@@ -42,6 +58,7 @@ const TIER_FEATURES = {
     badgeClass: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
     features: [
       'Unlimited analyses',
+      'All priority levels',
       'Branded PDF reports',
       'Dedicated support',
       'Full score breakdown',
@@ -95,10 +112,12 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
     : { count: 0 }
 
   const currentTier = (profile?.subscription_tier ?? 'free') as keyof typeof TIER_LIMITS
-  const tierConfig = TIER_FEATURES[currentTier]
+  // TIER_FEATURES has all tiers; fall back to 'free' if somehow not found
+  const tierConfig = TIER_FEATURES[currentTier as keyof typeof TIER_FEATURES] ?? TIER_FEATURES.free
   const tierLimits = TIER_LIMITS[currentTier]
   const analysisLimit = tierLimits.analyses_per_month
   const usedCount = analysesUsed ?? 0
+  const analysisCredits = (profile as { analysis_credits?: number } | null)?.analysis_credits ?? 0
 
   return (
     <div className="space-y-8">
@@ -149,24 +168,39 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
 
           {/* Usage */}
           <div className="min-w-48 space-y-2 rounded-lg border bg-muted/30 p-4">
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Analyses this month
-            </p>
-            <div className="flex items-end gap-1">
-              <span className="text-2xl font-bold">{usedCount}</span>
-              <span className="mb-0.5 text-sm text-muted-foreground">
-                / {analysisLimit === Infinity ? '∞' : analysisLimit}
-              </span>
-            </div>
-            {analysisLimit !== Infinity && (
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                <div
-                  className="h-full rounded-full bg-primary transition-all"
-                  style={{
-                    width: `${Math.min(100, Math.round((usedCount / analysisLimit) * 100))}%`,
-                  }}
-                />
-              </div>
+            {currentTier === 'unit' ? (
+              <>
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Analysis Credits
+                </p>
+                <div className="flex items-end gap-1">
+                  <span className="text-2xl font-bold">{analysisCredits}</span>
+                  <span className="mb-0.5 text-sm text-muted-foreground">remaining</span>
+                </div>
+                <p className="text-xs text-muted-foreground">Buy more below</p>
+              </>
+            ) : (
+              <>
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Analyses this month
+                </p>
+                <div className="flex items-end gap-1">
+                  <span className="text-2xl font-bold">{usedCount}</span>
+                  <span className="mb-0.5 text-sm text-muted-foreground">
+                    / {analysisLimit === Infinity ? '∞' : analysisLimit}
+                  </span>
+                </div>
+                {analysisLimit !== Infinity && (
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                    <div
+                      className="h-full rounded-full bg-primary transition-all"
+                      style={{
+                        width: `${Math.min(100, Math.round((usedCount / analysisLimit) * 100))}%`,
+                      }}
+                    />
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -177,6 +211,7 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
         currentTier={currentTier}
         hasWaveCustomer={!!profile?.wave_customer_id}
         pendingInvoiceUrl={subscription?.wave_invoice_id ? `/api/billing/invoice` : undefined}
+        highlightPlan={params.plan}
       />
 
       {/* Feature comparison table */}
@@ -199,44 +234,58 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
             <tbody>
               {[
                 {
-                  label: 'Analyses / month',
-                  free: '1',
-                  pro: '10',
+                  label: 'Analyses',
+                  free: '1 / month',
+                  unit: '1 credit',
+                  pro: '10 / month',
                   enterprise: 'Unlimited',
+                },
+                {
+                  label: 'Priority levels',
+                  free: 'Low, Normal',
+                  unit: 'All',
+                  pro: 'All',
+                  enterprise: 'All',
                 },
                 {
                   label: 'Branded PDF reports',
                   free: '—',
+                  unit: '✓',
                   pro: '✓',
                   enterprise: '✓',
                 },
                 {
                   label: 'Full score breakdown',
                   free: '—',
+                  unit: '✓',
                   pro: '✓',
                   enterprise: '✓',
                 },
                 {
                   label: 'Priority support',
                   free: '—',
+                  unit: '—',
                   pro: '✓',
                   enterprise: '✓',
                 },
                 {
                   label: 'Dedicated support',
                   free: '—',
+                  unit: '—',
                   pro: '—',
                   enterprise: '✓',
                 },
                 {
                   label: 'API access',
                   free: '—',
+                  unit: '—',
                   pro: '—',
                   enterprise: 'Coming soon',
                 },
                 {
                   label: 'Custom SLA',
                   free: '—',
+                  unit: '—',
                   pro: '—',
                   enterprise: '✓',
                 },
@@ -247,6 +296,7 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
                 >
                   <td className="px-6 py-3 font-medium">{row.label}</td>
                   <td className="px-6 py-3 text-center text-muted-foreground">{row.free}</td>
+                  <td className="px-6 py-3 text-center text-amber-600 dark:text-amber-400">{row.unit}</td>
                   <td className="px-6 py-3 text-center text-primary">{row.pro}</td>
                   <td className="px-6 py-3 text-center text-purple-600 dark:text-purple-400">
                     {row.enterprise}

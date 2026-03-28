@@ -1,10 +1,25 @@
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
 import { NewCaseForm } from '@/components/app/NewCaseForm'
+import type { SubscriptionTier } from '@/types'
 
 export const metadata = {
   title: 'Submit New Case — LVIS™',
 }
 
-export default function NewCasePage() {
+export default async function NewCasePage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/auth/login')
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('subscription_tier')
+    .eq('id', user.id)
+    .single()
+
+  const userTier = (profile?.subscription_tier ?? 'free') as SubscriptionTier
+
   return (
     <div className="mx-auto max-w-2xl">
       <div className="mb-6">
@@ -13,7 +28,7 @@ export default function NewCasePage() {
           Provide case details and upload an image for forensic analysis.
         </p>
       </div>
-      <NewCaseForm />
+      <NewCaseForm userTier={userTier} />
     </div>
   )
 }

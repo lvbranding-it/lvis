@@ -8,10 +8,10 @@ export async function POST(request: NextRequest) {
   if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await request.json()
-  const { tier } = body as { tier: 'pro' | 'enterprise' }
+  const { tier } = body as { tier: 'unit' | 'pro' | 'enterprise' }
 
-  if (!tier || !['pro', 'enterprise'].includes(tier)) {
-    return Response.json({ error: 'Invalid tier. Must be "pro" or "enterprise".' }, { status: 400 })
+  if (!tier || !['unit', 'pro', 'enterprise'].includes(tier)) {
+    return Response.json({ error: 'Invalid tier. Must be "unit", "pro", or "enterprise".' }, { status: 400 })
   }
 
   const serviceClient = createServiceClient()

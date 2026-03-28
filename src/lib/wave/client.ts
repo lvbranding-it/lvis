@@ -70,8 +70,9 @@ export async function waveCreateCustomer(
 // ── Invoice ────────────────────────────────────────────────────────────────────
 
 const PLAN_PRODUCTS: Record<string, { name: string; amount: number }> = {
-  pro:        { name: 'LVIS™ Pro — Monthly Subscription', amount: 4900 },   // cents
-  enterprise: { name: 'LVIS™ Enterprise — Monthly Subscription', amount: 19900 },
+  unit:       { name: 'LVIS™ — Single Analysis', amount: 999 },             // $9.99
+  pro:        { name: 'LVIS™ Pro — Monthly Subscription', amount: 4900 },   // $49.00
+  enterprise: { name: 'LVIS™ Enterprise — Monthly Subscription', amount: 19900 }, // $199.00
 }
 
 /**
@@ -79,13 +80,15 @@ const PLAN_PRODUCTS: Record<string, { name: string; amount: number }> = {
  * Prefers the env var (WAVE_PRODUCT_PRO_ID / WAVE_PRODUCT_ENTERPRISE_ID) for speed,
  * falls back to querying the Wave products list and matching by name.
  */
-async function resolveProductId(tier: 'pro' | 'enterprise'): Promise<string> {
-  const envKey = tier === 'pro' ? 'WAVE_PRODUCT_PRO_ID' : 'WAVE_PRODUCT_ENTERPRISE_ID'
+async function resolveProductId(tier: 'unit' | 'pro' | 'enterprise'): Promise<string> {
+  const envKey =
+    tier === 'unit' ? 'WAVE_PRODUCT_UNIT_ID' :
+    tier === 'pro'  ? 'WAVE_PRODUCT_PRO_ID'  : 'WAVE_PRODUCT_ENTERPRISE_ID'
   const envId = process.env[envKey]
   if (envId) return envId
 
   // Fallback: fetch all products from Wave and match by name fragment
-  const nameFragment = tier === 'pro' ? 'Pro' : 'Enterprise'
+  const nameFragment = tier === 'unit' ? 'Single Analysis' : tier === 'pro' ? 'Pro' : 'Enterprise'
   const data = await waveQuery<{
     business: { products: { edges: { node: { id: string; name: string } }[] } }
   }>(
@@ -118,7 +121,7 @@ async function resolveProductId(tier: 'pro' | 'enterprise'): Promise<string> {
  */
 export async function waveCreateInvoice(
   waveCustomerId: string,
-  tier: 'pro' | 'enterprise'
+  tier: 'unit' | 'pro' | 'enterprise'
 ): Promise<{ invoiceId: string; viewUrl: string }> {
   const product = PLAN_PRODUCTS[tier]
   if (!product) throw new Error(`Unknown tier: ${tier}`)
@@ -150,7 +153,9 @@ export async function waveCreateInvoice(
         customerId: waveCustomerId,
         invoiceDate: today,
         dueDate: today,
-        memo: `Thank you for subscribing to LVIS™ ${tier.charAt(0).toUpperCase() + tier.slice(1)}.`,
+        memo: tier === 'unit'
+          ? 'Thank you for purchasing an LVIS™ Single Analysis credit.'
+          : `Thank you for subscribing to LVIS™ ${tier.charAt(0).toUpperCase() + tier.slice(1)}.`,
         items: [
           {
             productId,

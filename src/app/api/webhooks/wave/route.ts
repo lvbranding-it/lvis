@@ -89,6 +89,11 @@ export async function POST(request: NextRequest) {
         subscription_tier: sub.tier,
       }).eq('id', sub.user_id)
 
+      // Unit purchases add 1 analysis credit instead of a recurring period
+      if (sub.tier === 'unit') {
+        await supabase.rpc('increment_analysis_credits', { p_user_id: sub.user_id, p_amount: 1 })
+      }
+
       console.log(`[wave-webhook] Activated ${sub.tier} for user ${sub.user_id}`)
     }
 

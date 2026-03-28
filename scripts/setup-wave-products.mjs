@@ -93,7 +93,13 @@ const incomeAccountId = await getIncomeAccountId()
 console.log('\nCreating LVIS products in Wave...\n')
 
 try {
-  const [pro, enterprise] = await Promise.all([
+  const [unit, pro, enterprise] = await Promise.all([
+    createProduct(
+      'LVIS™ — Single Analysis',
+      'One forensic image analysis credit (pay-per-use)',
+      9.99,
+      incomeAccountId
+    ),
     createProduct(
       'LVIS™ Pro — Monthly Subscription',
       '10 forensic image analyses per month',
@@ -110,6 +116,7 @@ try {
 
   console.log('✅  Products created successfully!\n')
   console.log('Add these to Vercel → Settings → Environment Variables:\n')
+  console.log(`WAVE_PRODUCT_UNIT_ID=${unit.id}`)
   console.log(`WAVE_PRODUCT_PRO_ID=${pro.id}`)
   console.log(`WAVE_PRODUCT_ENTERPRISE_ID=${enterprise.id}`)
   console.log('\nThen redeploy your Vercel project.')

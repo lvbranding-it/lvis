@@ -1,6 +1,6 @@
 // User & Auth
 export type UserRole = 'admin' | 'client'
-export type SubscriptionTier = 'free' | 'pro' | 'enterprise'
+export type SubscriptionTier = 'free' | 'unit' | 'pro' | 'enterprise'
 
 export interface Profile {
   id: string
@@ -9,6 +9,7 @@ export interface Profile {
   subscription_tier: SubscriptionTier
   wave_customer_id: string | null
   analyses_override: number | null
+  analysis_credits: number
   company_name: string | null
   phone: string | null
   created_at: string

@@ -12,7 +12,8 @@ import { toast } from 'sonner'
 import { formatFileSize, formatDateTime } from '@/lib/utils'
 import { PRIORITY_COLORS } from '@/lib/constants'
 import { LVISScoreCard } from '@/components/app/LVISScoreCard'
-import type { Case, ForensicReview, ClaudeFindings, TechnicalEvidence } from '@/types'
+import { SampleReportGate } from '@/components/app/SampleReportGate'
+import type { Case, ForensicReview, ClaudeFindings, TechnicalEvidence, SubscriptionTier } from '@/types'
 
 interface CaseDetailViewProps {
   caseData: Case & {
@@ -33,9 +34,10 @@ interface CaseDetailViewProps {
     raw_metadata: Record<string, unknown>
   } | null
   isAdmin: boolean
+  userTier?: SubscriptionTier
 }
 
-export function CaseDetailView({ caseData, metadata, isAdmin }: CaseDetailViewProps) {
+export function CaseDetailView({ caseData, metadata, isAdmin, userTier = 'free' }: CaseDetailViewProps) {
   const [isDownloading, setIsDownloading] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
   const [isSendingEmail, setIsSendingEmail] = useState(false)
@@ -44,6 +46,7 @@ export function CaseDetailView({ caseData, metadata, isAdmin }: CaseDetailViewPr
   const review = caseData.forensic_reviews?.[0]
   const caseFile = caseData.case_files?.[0]
   const isComplete = review?.analysis_status === 'complete'
+  const isFree = userTier === 'free'
 
   const handleDownloadReport = async () => {
     setIsDownloading(true)
@@ -119,8 +122,8 @@ export function CaseDetailView({ caseData, metadata, isAdmin }: CaseDetailViewPr
         </div>
 
         <div className="flex flex-wrap items-center gap-2 sm:shrink-0 sm:justify-end">
-          {/* Download — visible to anyone when report exists */}
-          {reportExists && (
+          {/* Download — visible to paid users when report exists */}
+          {reportExists && !isFree && (
             <Button onClick={handleDownloadReport} disabled={isDownloading} variant="outline" size="sm">
               <Download className="h-4 w-4 mr-2" />
               {isDownloading ? 'Loading…' : 'Download Report'}
@@ -227,11 +230,13 @@ export function CaseDetailView({ caseData, metadata, isAdmin }: CaseDetailViewPr
             </Card>
           ) : review?.analysis_status === 'complete' ? (
             <div className="space-y-4">
-              {/* Evidence Panel — lazy loaded */}
-              <EvidencePanelLazy
-                technicalEvidence={review.technical_evidence as TechnicalEvidence}
-                claudeFindings={review.claude_findings as ClaudeFindings}
-              />
+              {/* Evidence Panel — lazy loaded; gated for free-tier users */}
+              <SampleReportGate isGated={isFree}>
+                <EvidencePanelLazy
+                  technicalEvidence={review.technical_evidence as TechnicalEvidence}
+                  claudeFindings={review.claude_findings as ClaudeFindings}
+                />
+              </SampleReportGate>
             </div>
           ) : (
             <Card>
