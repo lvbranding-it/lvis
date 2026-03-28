@@ -4,7 +4,7 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { CaseCard } from '@/components/app/CaseCard'
 import { QuotaBanner } from '@/components/app/QuotaBanner'
 import { buttonVariants } from '@/components/ui/button-variants'
-import { FolderPlus, FolderOpen } from 'lucide-react'
+import { FolderPlus, FolderOpen, FileText } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { CASE_STATUS_LABELS, TIER_LIMITS } from '@/lib/constants'
 import type { Case, CaseStatus } from '@/types'
@@ -133,6 +133,24 @@ export default async function CasesPage({ searchParams }: CasesPageProps) {
       {/* Quota banner — shown when limit is reached */}
       {atLimit && effectiveLimit !== Infinity && (
         <QuotaBanner used={usedCount} limit={effectiveLimit} tier={tier} />
+      )}
+
+      {/* Sample report banner — free tier only, encourages upgrade by previewing report quality */}
+      {tier === 'free' && (
+        <div className="flex flex-wrap items-center gap-3 rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 dark:border-sky-900/40 dark:bg-sky-900/20">
+          <FileText className="size-4 shrink-0 text-sky-600 dark:text-sky-400" />
+          <p className="flex-1 text-sm text-sky-800 dark:text-sky-300">
+            Curious what a full forensic report looks like?{' '}
+            <a
+              href="/api/sample-report"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold underline underline-offset-2 hover:text-sky-900 dark:hover:text-sky-200 transition-colors"
+            >
+              View a sample report →
+            </a>
+          </p>
+        </div>
       )}
 
       {/* Header */}

@@ -236,7 +236,7 @@ export function buildReportProps(
         findings: findings.synthetic_risk.findings,
       },
       overall_observations: findings.overall_observations,
-      recommended_actions: findings.recommended_actions,
+      recommended_actions: (findings.recommended_actions ?? []).slice(0, 6),
     },
     exiftoolFlags: tech?.exiftool?.flags ?? [],
     opencvSummary: {
