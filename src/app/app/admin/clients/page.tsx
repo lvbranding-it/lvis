@@ -20,7 +20,6 @@ interface ClientRow {
   company_name: string | null
   subscription_tier: SubscriptionTier
   analyses_override: number | null
-  analysis_credits: number
   created_at: string
   cases: { count: number }[]
 }
@@ -57,7 +56,7 @@ export default async function AdminClientsPage() {
   // Fetch all clients
   const { data: clients } = await serviceClient
     .from('profiles')
-    .select('id, full_name, company_name, subscription_tier, analyses_override, analysis_credits, created_at, cases(count)')
+    .select('id, full_name, company_name, subscription_tier, analyses_override, created_at, cases(count)')
     .eq('role', 'client')
     .order('created_at', { ascending: false })
 
