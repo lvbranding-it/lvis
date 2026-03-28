@@ -19,11 +19,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .eq('id', user.id)
     .single()
 
-  // First-time users: show welcome / onboarding screen
-  if (profile && !profile.onboarding_completed) {
-    redirect('/auth/welcome')
-  }
-
   return (
     <AuthProvider>
       <AppShell profile={profile}>
