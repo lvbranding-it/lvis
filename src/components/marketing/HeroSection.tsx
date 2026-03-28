@@ -52,7 +52,7 @@ export function HeroSection() {
       </div>
 
       {/* Right panel: image fills full height absolutely */}
-      <div className="absolute inset-y-0 right-0 w-[52%] z-30 pointer-events-none">
+      <div className="absolute inset-y-0 right-[6%] w-[52%] z-30 pointer-events-none">
         <div className="relative h-full w-full hero-image">
           <Image
             src="/marketing/lvis-hero.png"
