@@ -36,7 +36,9 @@ export async function proxy(request: NextRequest) {
   }
 
   // Redirect authenticated users away from auth pages
-  if (user && request.nextUrl.pathname.startsWith('/auth')) {
+  // Exception: /auth/welcome is the onboarding screen — allow logged-in users to visit it.
+  const isAuthWelcome = request.nextUrl.pathname.startsWith('/auth/welcome')
+  if (user && request.nextUrl.pathname.startsWith('/auth') && !isAuthWelcome) {
     return NextResponse.redirect(new URL('/app/dashboard', request.url))
   }
 
