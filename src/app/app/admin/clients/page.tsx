@@ -257,7 +257,7 @@ export default async function AdminClientsPage() {
                     {/* Cases + chain of custody */}
                     <TableCell className="text-center">
                       <Link
-                        href={`/app/cases?client=${client.id}`}
+                        href={`/app/admin/cases?client=${client.id}`}
                         className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
                         title="View cases & chain of custody"
                       >

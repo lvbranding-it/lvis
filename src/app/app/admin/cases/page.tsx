@@ -5,13 +5,13 @@ import { CASE_STATUS_LABELS } from '@/lib/constants'
 import type { Case, Profile, ForensicReview, CaseStatus } from '@/types'
 
 interface Props {
-  searchParams: Promise<{ status?: string; q?: string }>
+  searchParams: Promise<{ status?: string; q?: string; client?: string }>
 }
 
 const ALL_STATUSES = Object.keys(CASE_STATUS_LABELS) as CaseStatus[]
 
 export default async function AdminCasesPage({ searchParams }: Props) {
-  const { status, q } = await searchParams
+  const { status, q, client: clientFilter } = await searchParams
   const supabase = await createClient()
   const {
     data: { user },
@@ -31,6 +31,9 @@ export default async function AdminCasesPage({ searchParams }: Props) {
   if (q?.trim()) {
     query = query.or(`title.ilike.%${q.trim()}%,case_number.ilike.%${q.trim()}%`)
   }
+  if (clientFilter?.trim()) {
+    query = query.eq('client_id', clientFilter.trim())
+  }
 
   const { data: cases } = await query
 
@@ -47,6 +50,7 @@ export default async function AdminCasesPage({ searchParams }: Props) {
           <h1 className="text-2xl font-bold tracking-tight">All Cases</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {normalizedCases.length} case{normalizedCases.length !== 1 ? 's' : ''}
+            {clientFilter ? ` · client filter active` : ''}
             {status ? ` · "${CASE_STATUS_LABELS[status as CaseStatus]}"` : ''}
             {q ? ` · "${q}"` : ''}
           </p>
