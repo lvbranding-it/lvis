@@ -148,7 +148,7 @@ export function EvidencePanel({ technicalEvidence, claudeFindings }: EvidencePan
 
       {/* ExifTool Section */}
       <AccordionSection
-        title="ExifTool Findings"
+        title="EXIF Analysis"
         badge={hasTechnicalEvidence ? exiftoolBadge.label : 'Unavailable'}
         badgeHexColor={hasTechnicalEvidence ? exiftoolBadge.hexColor : undefined}
         defaultOpen={hasTechnicalEvidence}
@@ -210,7 +210,7 @@ export function EvidencePanel({ technicalEvidence, claudeFindings }: EvidencePan
 
       {/* OpenCV Section */}
       <AccordionSection
-        title="OpenCV Analysis"
+        title="ELA Analysis"
         badge={hasTechnicalEvidence ? opencvBadge.label : 'Unavailable'}
         badgeHexColor={hasTechnicalEvidence ? opencvBadge.hexColor : undefined}
         defaultOpen={hasTechnicalEvidence}
@@ -270,7 +270,7 @@ export function EvidencePanel({ technicalEvidence, claudeFindings }: EvidencePan
 
       {/* Claude Vision Section */}
       <AccordionSection
-        title="Claude Vision Analysis"
+        title="Vision Analysis"
         badge={claudeBadge.label}
         badgeHexColor={claudeBadge.hexColor}
         defaultOpen
