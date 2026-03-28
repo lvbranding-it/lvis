@@ -1,6 +1,6 @@
 // Server-only — do NOT add 'use client'. This file is used exclusively for PDF rendering via @react-pdf/renderer.
 import {
-  Document, Page, View, Text, StyleSheet, Image,
+  Document, Page, View, Text, StyleSheet, Image, Link,
   Svg, Path, Polygon, Rect,
 } from '@react-pdf/renderer'
 import path from 'path'
@@ -772,6 +772,12 @@ function PageFooter({ caseNumber }: { caseNumber: string }) {
   return (
     <View style={s.footer} fixed>
       <Text style={s.footerText}>LVIS™ Forensic Analysis Report — {caseNumber}</Text>
+      <Link
+        src="https://www.lvbranding.com"
+        style={[s.footerText, { color: '#475569', textDecoration: 'none' }]}
+      >
+        Powered by LV Branding
+      </Link>
       <Text
         style={s.footerText}
         render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`}
@@ -843,7 +849,7 @@ function FindingsSection({
       </View>
       {/* Bullet points flow independently — they may continue onto the next page */}
       <View style={{ paddingHorizontal: 14, paddingBottom: 14 }}>
-        {data.findings.filter((f) => f && f.trim() !== '' && f.trim() !== '-').map((f, i) => (
+        {data.findings.filter((f) => f && f.trim() !== '' && f.trim() !== '-' && f.trim() !== '—' && f.trim() !== '–').map((f, i) => (
           <View key={i} style={s.findingBulletRow}>
             <View style={s.findingBullet} />
             <Text style={s.findingBulletText}>{f}</Text>

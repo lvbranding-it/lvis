@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import {
   DatabaseIcon,
   FileCheckIcon,
@@ -97,6 +98,17 @@ export function HowItWorks() {
           <p className="text-[#64748B] text-base leading-relaxed">
             A structured methodology developed through professional photographic practice and technical analysis. Each dimension produces a scored indicator that feeds the LV Authenticity Index™.
           </p>
+        </div>
+
+        {/* Methodology showcase image */}
+        <div className="mb-12 rounded-2xl overflow-hidden border border-white/5">
+          <Image
+            src="/marketing/lvis-methodology.png"
+            alt="LV Authenticity Index™ methodology overview"
+            width={1280}
+            height={640}
+            className="w-full object-cover"
+          />
         </div>
 
         {/* Steps grid — 2 cols then 3, with step 5 centered */}
