@@ -77,7 +77,7 @@ export default function ForgotPasswordPage() {
             LVIS<span className="text-[#60A5FA] text-lg align-super ml-0.5">™</span>
           </h1>
           <p className="mt-1 text-sm font-medium tracking-widest text-[#64748B] uppercase">
-            Image Integrity System™
+            LV Image Integrity System™
           </p>
         </div>
 

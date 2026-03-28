@@ -14,7 +14,7 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'LVIS™ — Luis Velasquez Image Integrity System™',
+  title: 'LVIS™ — LV Image Integrity System™',
   description:
     'Professional forensic photography analysis. The LV Authenticity Index™ delivers structured risk assessment and evidence-based image integrity evaluation for legal, insurance, and investigative professionals.',
 }

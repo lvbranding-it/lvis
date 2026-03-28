@@ -18,7 +18,7 @@ export function LvisLogoFull({ className = 'text-white', width = 160 }: LvisLogo
       height={height}
       fill="currentColor"
       className={className}
-      aria-label="LVIS™ — Luis Velasquez Image Integrity System™"
+      aria-label="LVIS™ — LV Image Integrity System™"
       role="img"
     >
       {/* L */}

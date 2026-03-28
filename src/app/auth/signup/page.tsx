@@ -96,7 +96,7 @@ export default function SignupPage() {
             LVIS<span className="text-[#60A5FA] text-lg align-super ml-0.5">™</span>
           </h1>
           <p className="text-sm font-medium tracking-widest text-[#64748B] uppercase mb-8">
-            Image Integrity System™
+            LV Image Integrity System™
           </p>
 
           <Card className="border border-[#1E293B] bg-[#0F1E33] shadow-2xl shadow-black/50">
@@ -151,7 +151,7 @@ export default function SignupPage() {
             LVIS<span className="text-[#60A5FA] text-lg align-super ml-0.5">™</span>
           </h1>
           <p className="mt-1 text-sm font-medium tracking-widest text-[#64748B] uppercase">
-            Image Integrity System™
+            LV Image Integrity System™
           </p>
         </div>
 

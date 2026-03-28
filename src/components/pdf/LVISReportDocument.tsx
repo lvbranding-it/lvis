@@ -843,7 +843,7 @@ function FindingsSection({
       </View>
       {/* Bullet points flow independently — they may continue onto the next page */}
       <View style={{ paddingHorizontal: 14, paddingBottom: 14 }}>
-        {data.findings.map((f, i) => (
+        {data.findings.filter((f) => f && f.trim() !== '' && f.trim() !== '-').map((f, i) => (
           <View key={i} style={s.findingBulletRow}>
             <View style={s.findingBullet} />
             <Text style={s.findingBulletText}>{f}</Text>
@@ -1304,7 +1304,8 @@ export function LVISReportDocument(props: LVISReportDocumentProps) {
       </Page>
 
       {/* ═══════════════════════════════════════════════════════════════════
-          PAGE 4 — FINDINGS (Part 1: Overall Observations + first 2 categories)
+          PAGES 4+ — FINDINGS (all 5 categories flow naturally across pages)
+          PageFooter is fixed so it repeats on every overflow page automatically.
       ═══════════════════════════════════════════════════════════════════ */}
       <Page size="A4" style={s.page}>
         <SectionHeader title="Detailed Findings" />
@@ -1330,20 +1331,9 @@ export function LVISReportDocument(props: LVISReportDocumentProps) {
             </View>
           ) : null}
 
+          {/* All 5 categories flow continuously — renderer paginates naturally */}
           <FindingsSection category="provenance" data={claudeFindings.provenance} />
           <FindingsSection category="file_integrity" data={claudeFindings.file_integrity} />
-        </View>
-
-        <PageFooter caseNumber={caseNumber} />
-      </Page>
-
-      {/* ═══════════════════════════════════════════════════════════════════
-          PAGE 5 — FINDINGS (Part 2: remaining 3 categories)
-      ═══════════════════════════════════════════════════════════════════ */}
-      <Page size="A4" style={s.page}>
-        <SectionHeader title="Detailed Findings (cont.)" />
-
-        <View style={s.pageBody}>
           <FindingsSection category="visual_consistency" data={claudeFindings.visual_consistency} />
           <FindingsSection category="manipulation" data={claudeFindings.manipulation} />
           <FindingsSection category="synthetic_risk" data={claudeFindings.synthetic_risk} />

@@ -123,7 +123,7 @@ function SidebarContent({
               LVIS™
             </div>
             <div className="text-[10px] leading-none text-[#475569] tracking-wide uppercase">
-              Image Integrity System™
+              LV Image Integrity System™
             </div>
           </div>
         </div>

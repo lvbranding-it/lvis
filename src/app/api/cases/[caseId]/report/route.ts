@@ -24,7 +24,7 @@ export async function GET(_request: NextRequest, { params }: RouteContext) {
   // Fetch the case to verify ownership / admin access
   const { data: caseData, error: caseError } = await supabase
     .from('cases')
-    .select('id, client_id')
+    .select('id, client_id, case_number')
     .eq('id', caseId)
     .single()
 
@@ -63,9 +63,10 @@ export async function GET(_request: NextRequest, { params }: RouteContext) {
 
   // Use service client to create signed URL (bypasses RLS on storage)
   const serviceClient = createServiceClient()
+  const downloadFilename = `LVIS™ — LV Image Integrity System™ - ${caseData.case_number}.pdf`
   const { data: signedData, error: signedError } = await serviceClient.storage
     .from('case-reports')
-    .createSignedUrl(report.storage_path, 3600)
+    .createSignedUrl(report.storage_path, 3600, { download: downloadFilename })
 
   if (signedError || !signedData?.signedUrl) {
     console.error('[report/route] createSignedUrl error:', signedError)

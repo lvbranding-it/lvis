@@ -119,7 +119,7 @@ export async function sendReportReadyEmail(opts: SendReportEmailOptions): Promis
           <tr>
             <td style="background:#F8FAFC;border-radius:0 0 12px 12px;padding:20px 40px;border:1px solid #E2E8F0;border-top:0;">
               <p style="margin:0;color:#94A3B8;font-size:11px;text-align:center;">
-                LVIS™ — Luis Velasquez Image Integrity System<br/>
+                LVIS™ — LV Image Integrity System™<br/>
                 This is an automated message. Do not reply to this email.
               </p>
             </td>

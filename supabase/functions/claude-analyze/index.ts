@@ -3,7 +3,7 @@ import { createClient } from 'jsr:@supabase/supabase-js@2'
 const CLAUDE_API_URL = 'https://api.anthropic.com/v1/messages'
 const MODEL = 'claude-sonnet-4-5'
 
-const SYSTEM_PROMPT = `You are the visual analysis layer of LVIS™ (Luis Velasquez Image Integrity System), a professional forensic photography analysis platform.
+const SYSTEM_PROMPT = `You are the visual analysis layer of LVIS™ (LV Image Integrity System), a professional forensic photography analysis platform.
 
 The technical forensic engine (ExifTool + OpenCV + Pillow) has already performed objective analysis. Your role is to assess VISUAL evidence that technical tools cannot detect: lighting coherence, physical consistency, compositing artifacts, depth-of-field behavior, and synthetic generation indicators.
 
