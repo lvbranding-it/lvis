@@ -12,7 +12,7 @@ export async function GET() {
 
   const { data, error } = await supabase.storage
     .from('case-reports')
-    .createSignedUrl('sample/sample-report.pdf', 3600) // 1-hour link
+    .createSignedUrl('sample/Sample-report.pdf', 3600) // 1-hour link
 
   if (error || !data?.signedUrl) {
     return NextResponse.json(
