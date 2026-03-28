@@ -99,7 +99,7 @@ export default function SignupPage() {
 
         <div className="relative w-full max-w-md text-center">
           <div className="flex justify-center mb-8">
-            <LvisLogoFull width={180} className="text-white" />
+            <LvisLogoFull width={126} className="text-white" />
           </div>
 
           <Card className="border border-[#1E293B] bg-[#0F1E33] shadow-2xl shadow-black/50">
@@ -146,8 +146,8 @@ export default function SignupPage() {
 
       <div className="relative w-full max-w-md">
         {/* Brand header */}
-        <div className="mb-8 text-center">
-          <LvisLogoFull width={180} className="text-white" />
+        <div className="mb-8 flex justify-center">
+          <LvisLogoFull width={126} className="text-white" />
         </div>
 
         {/* Signup card */}
