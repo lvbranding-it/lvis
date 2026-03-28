@@ -822,6 +822,12 @@ function ScoreBar({ name, score }: { name: string; score: number }) {
   )
 }
 
+// Max chars for a category narrative in the PDF — keeps each card within one A4 page.
+// Full narrative is always stored in the DB; this only affects the rendered PDF.
+const MAX_NARRATIVE_CHARS = 480
+// Max bullet points per findings category — prevents single card from overflowing a page.
+const MAX_FINDINGS_BULLETS = 8
+
 function FindingsSection({
   category,
   data,
@@ -830,26 +836,32 @@ function FindingsSection({
   data: { score: number; narrative: string; findings: string[] }
 }) {
   const color = scoreColor(data.score)
+
+  // Bound content so the entire card can safely use wrap={false} without ever
+  // exceeding a single A4 page (available body ≈ 726pt; capped card ≈ 260pt max).
+  const narrative = data.narrative.length > MAX_NARRATIVE_CHARS
+    ? data.narrative.slice(0, MAX_NARRATIVE_CHARS).trimEnd() + '…'
+    : data.narrative
+
+  const bullets = data.findings
+    .filter((f) => f && f.trim() !== '' && f.trim() !== '-' && f.trim() !== '—' && f.trim() !== '–')
+    .slice(0, MAX_FINDINGS_BULLETS)
+
   return (
-    // No wrap={false} on the outer card — allows the section to split across pages
-    // naturally instead of leaving large whitespace gaps when a card is too tall to fit.
-    <View style={s.findingsCategory}>
-      {/* Header + narrative kept together — prevents category title from stranding
-          alone at the bottom of a page without any body content beneath it. */}
-      <View wrap={false}>
-        <View style={s.findingsCategoryHeader}>
-          <Text style={s.findingsCategoryName}>{CategoryLabel(category)}</Text>
-          <View style={[s.findingsScorePill, { backgroundColor: color }]}>
-            <Text style={s.findingsScorePillText}>{data.score} / 100</Text>
-          </View>
-        </View>
-        <View style={[s.findingsCategoryBody, { paddingBottom: 0 }]}>
-          <Text style={s.narrativeText}>{data.narrative}</Text>
+    // wrap={false} keeps the entire card (header + narrative + bullets) on one page.
+    // Content is bounded above so no card can exceed the available page height.
+    <View style={s.findingsCategory} wrap={false}>
+      <View style={s.findingsCategoryHeader}>
+        <Text style={s.findingsCategoryName}>{CategoryLabel(category)}</Text>
+        <View style={[s.findingsScorePill, { backgroundColor: color }]}>
+          <Text style={s.findingsScorePillText}>{data.score} / 100</Text>
         </View>
       </View>
-      {/* Bullet points flow independently — they may continue onto the next page */}
+      <View style={[s.findingsCategoryBody, { paddingBottom: 0 }]}>
+        <Text style={s.narrativeText}>{narrative}</Text>
+      </View>
       <View style={{ paddingHorizontal: 14, paddingBottom: 14 }}>
-        {data.findings.filter((f) => f && f.trim() !== '' && f.trim() !== '-' && f.trim() !== '—' && f.trim() !== '–').map((f, i) => (
+        {bullets.map((f, i) => (
           <View key={i} style={s.findingBulletRow}>
             <View style={s.findingBullet} />
             <Text style={s.findingBulletText}>{f}</Text>
