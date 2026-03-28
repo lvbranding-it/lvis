@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Shield, ArrowRightIcon } from 'lucide-react'
+import { ArrowRightIcon } from 'lucide-react'
+import { LvisLogoFull } from '@/components/brand/LvisLogoFull'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -50,16 +51,8 @@ export default function WelcomePage() {
 
       <div className="relative w-full max-w-md">
         {/* Brand header */}
-        <div className="mb-8 text-center">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#1E3A5F] border border-[#2D5A8E] mb-5 shadow-lg shadow-blue-950/40">
-            <Shield className="w-7 h-7 text-[#60A5FA]" />
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight text-white">
-            LVIS<span className="text-[#60A5FA] text-lg align-super ml-0.5">™</span>
-          </h1>
-          <p className="mt-1 text-sm font-medium tracking-widest text-[#64748B] uppercase">
-            LV Image Integrity System™
-          </p>
+        <div className="mb-8 flex justify-center">
+          <LvisLogoFull width={180} className="text-white" />
         </div>
 
         <Card className="border border-[#1E293B] bg-[#0F1E33] shadow-2xl shadow-black/50">

@@ -13,9 +13,9 @@ import {
   Menu,
   LogOut,
   ChevronRight,
-  ShieldCheck,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { LvisLogoFull } from '@/components/brand/LvisLogoFull'
 import { useAuth } from '@/hooks/useAuth'
 import { NAV_ITEMS, ADMIN_NAV_ITEMS } from '@/lib/constants'
 import type { Profile } from '@/types'
@@ -113,20 +113,8 @@ function SidebarContent({
   return (
     <div className="flex h-full flex-col">
       {/* Logo */}
-      <div className="border-b border-white/5 px-4 py-5">
-        <div className="flex items-center gap-2.5">
-          <div className="flex size-8 items-center justify-center rounded-md bg-primary">
-            <ShieldCheck className="size-4.5 text-white" />
-          </div>
-          <div>
-            <div className="font-heading text-sm font-bold tracking-tight text-white">
-              LVIS™
-            </div>
-            <div className="text-[10px] leading-none text-[#475569] tracking-wide uppercase">
-              LV Image Integrity System™
-            </div>
-          </div>
-        </div>
+      <div className="border-b border-white/5 px-4 py-4">
+        <LvisLogoFull width={110} className="text-white" />
       </div>
 
       {/* Nav */}
