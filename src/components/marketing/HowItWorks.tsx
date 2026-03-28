@@ -87,28 +87,31 @@ export function HowItWorks() {
       className="bg-[#060E1A] py-24 border-t border-white/5"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="max-w-2xl mx-auto text-center mb-16">
-          <p className="text-[#60A5FA] text-xs font-semibold uppercase tracking-widest mb-4">
-            Methodology
-          </p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-4">
-            How LVIS™ Works
-          </h2>
-          <p className="text-[#64748B] text-base leading-relaxed">
-            A structured methodology developed through professional photographic practice and technical analysis. Each dimension produces a scored indicator that feeds the LV Authenticity Index™.
-          </p>
-        </div>
+        {/* Header — two columns: text left, image right */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center mb-16">
+          {/* Left: text */}
+          <div>
+            <p className="text-[#60A5FA] text-xs font-semibold uppercase tracking-widest mb-4">
+              Methodology
+            </p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-4">
+              How LVIS™ Works
+            </h2>
+            <p className="text-[#64748B] text-base leading-relaxed">
+              A structured methodology developed through professional photographic practice and technical analysis. Each dimension produces a scored indicator that feeds the LV Authenticity Index™.
+            </p>
+          </div>
 
-        {/* Methodology showcase image */}
-        <div className="mb-12 flex justify-center">
-          <Image
-            src="/marketing/lvis-methodology.png"
-            alt="LV Authenticity Index™ methodology overview"
-            width={800}
-            height={400}
-            className="w-full max-w-2xl object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.5)]"
-          />
+          {/* Right: floating image */}
+          <div className="flex justify-center lg:justify-end">
+            <Image
+              src="/marketing/lvis-methodology.png"
+              alt="LV Authenticity Index™ methodology overview"
+              width={500}
+              height={250}
+              className="w-full max-w-[500px] object-contain drop-shadow-[0_24px_48px_rgba(0,0,0,0.6)]"
+            />
+          </div>
         </div>
 
         {/* Steps grid — 2 cols then 3, with step 5 centered */}
