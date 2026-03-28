@@ -51,61 +51,58 @@ export function HeroSection() {
         />
       </div>
 
-      {/* Content — same container as the navbar */}
+      {/* Right panel: image fills full height absolutely */}
+      <div className="absolute inset-y-0 right-0 w-[52%] z-30 pointer-events-none">
+        <div className="relative h-full w-full hero-image">
+          <Image
+            src="/marketing/lvis-hero.png"
+            alt="LV Authenticity Index™ sample report"
+            fill
+            className="object-contain object-center"
+            priority
+          />
+        </div>
+      </div>
+
+      {/* Left panel: text — same horizontal container as navbar */}
       <div className="relative z-30 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="h-full grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+        <div className="h-full w-full lg:w-[48%] flex flex-col justify-center py-20">
 
-          {/* Left: text */}
-          <div className="flex flex-col justify-center text-center lg:text-left">
-            <div className="hero-badge inline-flex items-center gap-3 self-center lg:self-start
-                            bg-[#1E3A5F]/50 border border-[#2D5A8E]/40 rounded-full px-4 py-1.5 mb-8">
-              <QualitySeal size={24} sealColor="#1E3A5F" detailColor="#60A5FA" />
-              <span className="text-[#93C5FD] text-xs font-medium tracking-wide">
-                Professional Forensic Photography Platform
-              </span>
-            </div>
-
-            <div className="hero-logo mb-3 flex justify-center lg:justify-start">
-              <LvisLogoFull width={340} className="text-white" />
-            </div>
-
-            <p className="hero-tag text-white text-2xl italic mb-6">
-              Integrity you can verify.
-            </p>
-
-            <p className="hero-desc text-[#94A3B8] text-base leading-relaxed mb-10">
-              LVIS™ delivers structured, evidence-based forensic analysis of photographic images. Using the proprietary{' '}
-              <strong className="text-[#CBD5E1] font-medium">LV Authenticity Index™</strong>, every image is evaluated
-              across five critical dimensions — provenance, file integrity, visual consistency, manipulation likelihood,
-              and synthetic risk — producing a defensible risk score for professional and legal contexts.
-            </p>
-
-            <div className="hero-ctas flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
-              <Link href="/request">
-                <Button size="lg" className="bg-[#1D4ED8] hover:bg-[#1E40AF] text-white border-0 font-medium px-6 h-11 text-sm w-full sm:w-auto">
-                  Request an Analysis
-                  <ArrowRightIcon className="size-4 ml-1" />
-                </Button>
-              </Link>
-              <Link href="#authenticity-index">
-                <Button variant="outline" size="lg" className="border-[#1E3A5F] text-[#94A3B8] hover:text-white hover:bg-white/5 hover:border-[#2D5A8E] font-medium px-6 h-11 text-sm w-full sm:w-auto bg-transparent">
-                  Learn About the LV Authenticity Index™
-                </Button>
-              </Link>
-            </div>
+          <div className="hero-badge inline-flex items-center gap-3 self-start
+                          bg-[#1E3A5F]/50 border border-[#2D5A8E]/40 rounded-full px-4 py-1.5 mb-8">
+            <QualitySeal size={24} sealColor="#1E3A5F" detailColor="#60A5FA" />
+            <span className="text-[#93C5FD] text-xs font-medium tracking-wide">
+              Professional Forensic Photography Platform
+            </span>
           </div>
 
-          {/* Right: hero image — height-driven, fills viewport top to bottom */}
-          <div className="hidden lg:flex items-center justify-center h-full">
-            <Image
-              src="/marketing/lvis-hero.png"
-              alt="LV Authenticity Index™ sample report"
-              width={1000}
-              height={1250}
-              className="hero-image object-contain"
-              style={{ height: '88vh', width: 'auto', maxWidth: '100%' }}
-              priority
-            />
+          <div className="hero-logo mb-3">
+            <LvisLogoFull width={340} className="text-white" />
+          </div>
+
+          <p className="hero-tag text-white text-2xl italic mb-6">
+            Integrity you can verify.
+          </p>
+
+          <p className="hero-desc text-[#94A3B8] text-base leading-relaxed mb-10">
+            LVIS™ delivers structured, evidence-based forensic analysis of photographic images. Using the proprietary{' '}
+            <strong className="text-[#CBD5E1] font-medium">LV Authenticity Index™</strong>, every image is evaluated
+            across five critical dimensions — provenance, file integrity, visual consistency, manipulation likelihood,
+            and synthetic risk — producing a defensible risk score for professional and legal contexts.
+          </p>
+
+          <div className="hero-ctas flex flex-col sm:flex-row gap-3">
+            <Link href="/request">
+              <Button size="lg" className="bg-[#1D4ED8] hover:bg-[#1E40AF] text-white border-0 font-medium px-6 h-11 text-sm w-full sm:w-auto">
+                Request an Analysis
+                <ArrowRightIcon className="size-4 ml-1" />
+              </Button>
+            </Link>
+            <Link href="#authenticity-index">
+              <Button variant="outline" size="lg" className="border-[#1E3A5F] text-[#94A3B8] hover:text-white hover:bg-white/5 hover:border-[#2D5A8E] font-medium px-6 h-11 text-sm w-full sm:w-auto bg-transparent">
+                Learn About the LV Authenticity Index™
+              </Button>
+            </Link>
           </div>
 
         </div>
