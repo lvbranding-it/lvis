@@ -68,12 +68,12 @@ export function Navbar() {
                 Log In
               </Button>
             </Link>
-            <Link href="/request">
+            <Link href="/auth/signup">
               <Button
                 size="sm"
                 className="bg-[#1D4ED8] hover:bg-[#1E40AF] text-white border-0 font-medium"
               >
-                Request Analysis
+                Get Started Free
               </Button>
             </Link>
           </div>
@@ -138,9 +138,9 @@ export function Navbar() {
                       Log In
                     </Button>
                   </Link>
-                  <Link href="/request" onClick={() => setMobileOpen(false)}>
+                  <Link href="/auth/signup" onClick={() => setMobileOpen(false)}>
                     <Button className="w-full bg-[#1D4ED8] hover:bg-[#1E40AF] text-white border-0">
-                      Request Analysis
+                      Get Started Free
                     </Button>
                   </Link>
                 </div>

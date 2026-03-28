@@ -92,9 +92,9 @@ export function HeroSection() {
           </p>
 
           <div className="hero-ctas flex flex-col sm:flex-row gap-3">
-            <Link href="/request">
+            <Link href="/auth/signup">
               <Button size="lg" className="bg-[#1D4ED8] hover:bg-[#1E40AF] text-white border-0 font-medium px-6 h-11 text-sm w-full sm:w-auto">
-                Request an Analysis
+                Get Started Free
                 <ArrowRightIcon className="size-4 ml-1" />
               </Button>
             </Link>

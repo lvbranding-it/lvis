@@ -20,33 +20,27 @@ import {
 import { createClient } from '@/lib/supabase/client'
 import { Eye, EyeOff, Shield, CheckCircle2 } from 'lucide-react'
 
-const signupSchema = z
-  .object({
-    full_name: z
-      .string()
-      .min(2, 'Full name must be at least 2 characters')
-      .max(100, 'Name is too long'),
-    email: z.string().email('Enter a valid email address'),
-    password: z
-      .string()
-      .min(8, 'Password must be at least 8 characters')
-      .regex(/[A-Z]/, 'Include at least one uppercase letter')
-      .regex(/[0-9]/, 'Include at least one number'),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: 'Passwords do not match',
-    path: ['confirmPassword'],
-  })
+const signupSchema = z.object({
+  full_name: z
+    .string()
+    .min(2, 'Full name must be at least 2 characters')
+    .max(100, 'Name is too long'),
+  email: z.string().email('Enter a valid email address'),
+  password: z
+    .string()
+    .min(8, 'Password must be at least 8 characters')
+    .regex(/[A-Z]/, 'Include at least one uppercase letter')
+    .regex(/[0-9]/, 'Include at least one number'),
+})
 
 type SignupFormValues = z.infer<typeof signupSchema>
 
 export default function SignupPage() {
   const supabase = createClient()
   const [showPassword, setShowPassword] = useState(false)
-  const [showConfirm, setShowConfirm] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [submittedEmail, setSubmittedEmail] = useState('')
+  const [googleLoading, setGoogleLoading] = useState(false)
 
   const {
     register,
@@ -55,6 +49,20 @@ export default function SignupPage() {
   } = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
   })
+
+  const handleGoogleSignIn = async () => {
+    setGoogleLoading(true)
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    })
+    if (error) {
+      toast.error(error.message ?? 'Google sign-in failed. Please try again.')
+      setGoogleLoading(false)
+    }
+  }
 
   const onSubmit = async (values: SignupFormValues) => {
     const { error } = await supabase.auth.signUp({
@@ -162,12 +170,39 @@ export default function SignupPage() {
               Create an account
             </CardTitle>
             <CardDescription className="text-[#64748B] text-sm">
-              Request access to the LVIS forensic platform.
+              Start your free account — no credit card required.
             </CardDescription>
           </CardHeader>
 
-          <form onSubmit={handleSubmit(onSubmit)} noValidate>
-            <CardContent className="pt-6 space-y-5">
+          <CardContent className="pt-6 space-y-4">
+            {/* Google OAuth */}
+            <button
+              type="button"
+              onClick={handleGoogleSignIn}
+              disabled={googleLoading}
+              className="w-full flex items-center justify-center gap-3 h-10 rounded-md border border-[#1E293B] bg-white text-[#1E293B] text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-60"
+            >
+              {googleLoading ? (
+                <span className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden>
+                  <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/>
+                  <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
+                  <path fill="#FBBC05" d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z"/>
+                  <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 7.293C4.672 5.163 6.656 3.58 9 3.58z"/>
+                </svg>
+              )}
+              Continue with Google
+            </button>
+
+            {/* Divider */}
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-px bg-[#1E293B]" />
+              <span className="text-[#334155] text-xs">or</span>
+              <div className="flex-1 h-px bg-[#1E293B]" />
+            </div>
+
+            <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
               {/* Full name */}
               <div className="space-y-1.5">
                 <Label
@@ -261,47 +296,6 @@ export default function SignupPage() {
                 )}
               </div>
 
-              {/* Confirm password */}
-              <div className="space-y-1.5">
-                <Label
-                  htmlFor="confirmPassword"
-                  className="text-xs font-semibold tracking-wider uppercase text-[#94A3B8]"
-                >
-                  Confirm Password
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="confirmPassword"
-                    type={showConfirm ? 'text' : 'password'}
-                    autoComplete="new-password"
-                    placeholder="••••••••"
-                    {...register('confirmPassword')}
-                    className="
-                      bg-[#0F172A] border-[#1E293B] text-white placeholder:text-[#334155]
-                      focus-visible:ring-[#2D5A8E] focus-visible:border-[#2D5A8E]
-                      h-10 text-sm pr-10
-                    "
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirm((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#475569] hover:text-[#94A3B8] transition-colors"
-                    aria-label={showConfirm ? 'Hide password' : 'Show password'}
-                  >
-                    {showConfirm ? (
-                      <EyeOff className="w-4 h-4" />
-                    ) : (
-                      <Eye className="w-4 h-4" />
-                    )}
-                  </button>
-                </div>
-                {errors.confirmPassword && (
-                  <p className="text-xs text-red-400 mt-1">{errors.confirmPassword.message}</p>
-                )}
-              </div>
-            </CardContent>
-
-            <CardFooter className="flex flex-col gap-4 pt-2 pb-6 px-6">
               <Button
                 type="submit"
                 disabled={isSubmitting}
@@ -321,18 +315,18 @@ export default function SignupPage() {
                   'Create account'
                 )}
               </Button>
+            </form>
 
-              <p className="text-xs text-center text-[#475569]">
-                Already have an account?{' '}
-                <Link
-                  href="/auth/login"
-                  className="text-[#60A5FA] hover:text-[#93C5FD] font-medium transition-colors"
-                >
-                  Sign in
-                </Link>
-              </p>
-            </CardFooter>
-          </form>
+            <p className="text-xs text-center text-[#475569] pt-1">
+              Already have an account?{' '}
+              <Link
+                href="/auth/login"
+                className="text-[#60A5FA] hover:text-[#93C5FD] font-medium transition-colors"
+              >
+                Sign in
+              </Link>
+            </p>
+          </CardContent>
         </Card>
 
         <p className="mt-6 text-center text-[10px] tracking-widest text-[#334155] uppercase">

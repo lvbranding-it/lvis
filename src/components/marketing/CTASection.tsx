@@ -21,32 +21,32 @@ export function CTASection() {
 
         {/* Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <Link href="/request">
+          <Link href="/auth/signup">
             <Button
               size="lg"
               className="bg-[#1D4ED8] hover:bg-[#1E40AF] text-white border-0 font-medium px-8 h-12 text-base w-full sm:w-auto"
             >
-              Request an Analysis
+              Get Started Free
               <ArrowRightIcon className="size-4 ml-1.5" />
             </Button>
           </Link>
-          <Link href="/auth/signup">
+          <Link href="/auth/login">
             <Button
               variant="outline"
               size="lg"
               className="border-[#1E3A5F] text-[#94A3B8] hover:text-white hover:bg-white/5 hover:border-[#2D5A8E] font-medium px-8 h-12 text-base w-full sm:w-auto bg-transparent"
             >
-              Create a Free Account
+              Sign In
             </Button>
           </Link>
         </div>
 
         <p className="text-[#334155] text-xs mt-6">
-          No subscription required for a single analysis. See{' '}
+          Free tier available — no credit card required. See{' '}
           <Link href="/pricing" className="text-[#475569] hover:text-[#64748B] underline underline-offset-2">
             pricing
           </Link>{' '}
-          for all options.
+          for all plans.
         </p>
       </div>
     </section>

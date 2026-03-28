@@ -1,12 +1,12 @@
 import Link from 'next/link'
-import { CheckIcon, ArrowRightIcon, ZapIcon, BuildingIcon, StarIcon } from 'lucide-react'
+import { CheckIcon, ArrowRightIcon, ZapIcon, BuildingIcon, StarIcon, CreditCardIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Pricing — LVIS™',
   description:
-    'LVIS™ pricing: free single analysis, Pro subscription, and Enterprise agreements for high-volume and institutional use.',
+    'LVIS™ pricing: free tier, pay-per-report, Pro subscription, and Enterprise agreements for high-volume and institutional use.',
 }
 
 const tiers = [
@@ -14,8 +14,8 @@ const tiers = [
     id: 'free',
     name: 'Free',
     price: '$0',
-    period: null,
-    description: 'For individuals needing a single integrity evaluation.',
+    period: 'forever',
+    description: 'For individuals exploring image forensic analysis.',
     icon: StarIcon,
     highlight: false,
     badge: null,
@@ -24,18 +24,40 @@ const tiers = [
     ctaVariant: 'outline' as const,
     features: [
       '1 analysis per month',
-      'Standard LV Authenticity Index™ report',
+      'LV Authenticity Index™ score preview',
       'Five-dimension scoring',
-      'PDF report download',
-      'Standard turnaround (5–7 business days)',
+      'Low & Normal priority processing',
       'Email support',
     ],
     notIncluded: [
-      'Branded PDF reports',
-      'Priority processing',
+      'Branded PDF report download',
+      'High & Urgent priority',
       'Expert opinion letters',
       'API access',
-      'White-label output',
+    ],
+  },
+  {
+    id: 'unit',
+    name: 'By Unit',
+    price: '$9.99',
+    period: 'per report',
+    description: 'Pay only for what you need — one credit, one complete report.',
+    icon: CreditCardIcon,
+    highlight: false,
+    badge: null,
+    cta: 'Buy a Report',
+    ctaHref: '/auth/signup',
+    ctaVariant: 'outline' as const,
+    features: [
+      '1 analysis credit (never expires)',
+      'Full branded PDF report',
+      'Five-dimension scoring',
+      'All priority levels',
+      'Email support',
+    ],
+    notIncluded: [
+      'Expert opinion letters',
+      'API access',
     ],
   },
   {
@@ -48,17 +70,16 @@ const tiers = [
     highlight: true,
     badge: 'Most Popular',
     cta: 'Start Pro',
-    ctaHref: '/auth/signup?plan=pro',
+    ctaHref: '/auth/signup',
     ctaVariant: 'default' as const,
     features: [
       '10 analyses per month',
       'Full branded PDF report',
-      'Five-dimension scoring with evidence maps',
-      'Priority processing (2–3 business days)',
+      'Five-dimension scoring',
+      'All priority levels',
       'Case management dashboard',
       'PDF archive and re-download',
       'Priority email support',
-      'Rollover of unused analyses (up to 5)',
     ],
     notIncluded: [
       'Expert opinion letters',
@@ -69,26 +90,22 @@ const tiers = [
   {
     id: 'enterprise',
     name: 'Enterprise',
-    price: 'Custom',
-    period: null,
+    price: '$199',
+    period: '/month',
     description: 'For institutions, law firms, media organizations, and competition bodies.',
     icon: BuildingIcon,
     highlight: false,
     badge: null,
-    cta: 'Contact Us',
-    ctaHref: '/request',
+    cta: 'Get Enterprise',
+    ctaHref: '/auth/signup',
     ctaVariant: 'outline' as const,
     features: [
       'Unlimited analyses',
-      'White-label branded reports',
-      'Expert opinion letters included',
-      'Dedicated analyst assignment',
-      'API access (bulk submission)',
-      'SLA with guaranteed turnaround',
-      'Priority processing (24–48 hours)',
-      'Custom reporting templates',
-      'Institutional billing and invoicing',
-      'Dedicated support contact',
+      'Full branded PDF reports',
+      'All priority levels',
+      'Dedicated support',
+      'API access (coming soon)',
+      'Custom SLA',
     ],
     notIncluded: [],
   },
@@ -104,8 +121,8 @@ const faqs = [
     a: 'Expert Opinion Reports — formal letters structured for legal evidentiary use — are available on Enterprise plans or as a standalone add-on on Pro. Contact us for pricing.',
   },
   {
-    q: 'When will payment processing be available?',
-    a: 'Stripe payment integration is under active development. To subscribe to a paid plan today, contact us directly and we will arrange billing.',
+    q: 'Can I pay per report without a subscription?',
+    a: 'Yes — the By Unit plan lets you purchase a single analysis credit for $9.99 with no recurring commitment. Credits never expire.',
   },
   {
     q: 'Is analysis available for bulk or batch submissions?',
@@ -118,10 +135,6 @@ const faqs = [
 ]
 
 export default function PricingPage() {
-  const stripeConfigured = !!(
-    process.env.STRIPE_SECRET_KEY && process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-  )
-
   return (
     <div className="min-h-screen bg-[#0F172A]">
       {/* Page hero */}
@@ -134,22 +147,14 @@ export default function PricingPage() {
             Simple, Professional Pricing
           </h1>
           <p className="text-[#64748B] text-base leading-relaxed max-w-xl mx-auto">
-            Start with a free analysis, or subscribe for regular access to the full LVIS™ platform. Enterprise agreements are available for institutional and high-volume clients.
+            Start free, pay per report, or subscribe for regular access. Choose what fits your workflow.
           </p>
-
-          {!stripeConfigured && (
-            <div className="mt-6 inline-flex items-center gap-2 bg-[#78350F]/20 border border-[#92400E]/30 rounded-full px-4 py-1.5">
-              <span className="text-[#FCD34D] text-xs font-medium">
-                Stripe payments coming soon — contact us to activate a paid plan
-              </span>
-            </div>
-          )}
         </div>
       </div>
 
       {/* Tier cards */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 items-start">
           {tiers.map((tier) => {
             const Icon = tier.icon
             return (
@@ -261,7 +266,7 @@ export default function PricingPage() {
         <div className="mt-8 p-5 bg-[#0A1628] border border-white/5 rounded-xl text-center">
           <p className="text-[#64748B] text-sm">
             Need bulk pricing for competition submissions or institutional review?{' '}
-            <Link href="/request" className="text-[#60A5FA] hover:text-[#93C5FD] font-medium underline underline-offset-2">
+            <Link href="/auth/signup" className="text-[#60A5FA] hover:text-[#93C5FD] font-medium underline underline-offset-2">
               Contact us
             </Link>{' '}
             for a custom quote.
@@ -305,12 +310,12 @@ export default function PricingPage() {
                 <ArrowRightIcon className="size-3.5 ml-1" />
               </Button>
             </Link>
-            <Link href="/request">
+            <Link href="/auth/login">
               <Button
                 variant="outline"
                 className="border-[#1E3A5F] text-[#94A3B8] hover:text-white hover:bg-white/5 hover:border-[#2D5A8E] bg-transparent font-medium px-8 h-10"
               >
-                Request Without Account
+                Sign In
               </Button>
             </Link>
           </div>

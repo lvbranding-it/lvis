@@ -31,7 +31,7 @@ export function Footer() {
               {[
                 { label: 'Services', href: '/services' },
                 { label: 'Pricing', href: '/pricing' },
-                { label: 'Request Analysis', href: '/request' },
+                { label: 'Get Started Free', href: '/auth/signup' },
                 { label: 'Log In', href: '/auth/login' },
               ].map((link) => (
                 <li key={link.href}>

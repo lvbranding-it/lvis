@@ -79,7 +79,7 @@ export function ServicesSection() {
           <p className="text-[#64748B] text-sm mb-4">
             Ready to request a forensic analysis?
           </p>
-          <Link href="/request">
+          <Link href="/auth/signup">
             <Button
               size="lg"
               className="bg-[#1D4ED8] hover:bg-[#1E40AF] text-white border-0 font-medium px-8 h-11"
@@ -93,7 +93,7 @@ export function ServicesSection() {
             <Link href="/pricing" className="text-[#475569] hover:text-[#64748B] underline underline-offset-2">
               pricing
             </Link>{' '}
-            for turnaround times and deliverable formats.
+            for plan details.
           </p>
         </div>
       </div>
@@ -109,7 +109,7 @@ function ServiceCard({
   Icon: React.ComponentType<{ className?: string }>
 }) {
   return (
-    <Link href="/request" className="group block">
+    <Link href="/auth/signup" className="group block">
       <div className="h-full p-6 bg-[#0A1628] border border-white/5 rounded-xl hover:border-[#1E3A5F]/60 transition-all group-hover:bg-[#0A1628]/80">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-[#1E3A5F]/50 border border-[#2D5A8E]/30">
@@ -128,7 +128,7 @@ function ServiceCard({
         </p>
 
         <div className="flex items-center gap-1 text-[#60A5FA] text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-          <span>Request this service</span>
+          <span>Get started</span>
           <ArrowRightIcon className="size-3 translate-x-0 group-hover:translate-x-0.5 transition-transform" />
         </div>
       </div>
