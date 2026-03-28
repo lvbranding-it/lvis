@@ -119,12 +119,12 @@ interface FieldGroupProps {
 function FieldGroup({ label, required, children, hint }: FieldGroupProps) {
   return (
     <div className="space-y-1.5">
-      <label className="block text-sm font-medium">
+      <label className="block text-sm font-medium text-[#94A3B8] uppercase tracking-wider text-[11px]">
         {label}
         {required && <span className="ml-0.5 text-destructive">*</span>}
       </label>
       {children}
-      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+      {hint && <p className="text-xs text-[#64748B]">{hint}</p>}
     </div>
   )
 }
@@ -481,7 +481,7 @@ export function NewCaseForm({ userTier = 'free' }: NewCaseFormProps) {
   }
 
   return (
-    <div className="rounded-xl border bg-card p-6 md:p-8">
+    <div className="rounded-xl border border-[#1E293B] bg-[#0F1E33] p-6 md:p-8">
       <StepIndicator currentStep={step} />
 
       {step === 1 && (
@@ -503,7 +503,7 @@ export function NewCaseForm({ userTier = 'free' }: NewCaseFormProps) {
             <select
               value={formData.purpose}
               onChange={(e) => setField('purpose', e.target.value)}
-              className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
+              className="h-8 w-full rounded-lg border border-[#1E293B] bg-[#0A1628] text-white px-2.5 py-1 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               <option value="">Select a purpose…</option>
               {PURPOSE_OPTIONS.map((o) => (
@@ -558,7 +558,7 @@ export function NewCaseForm({ userTier = 'free' }: NewCaseFormProps) {
               onChange={(e) => setField('description', e.target.value)}
               placeholder="Provide any relevant background information…"
               rows={3}
-              className="w-full rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 resize-none dark:bg-input/30"
+              className="w-full rounded-lg border border-[#1E293B] bg-[#0A1628] text-white px-2.5 py-2 text-sm outline-none placeholder:text-[#334155] focus-visible:border-blue-500/50 focus-visible:ring-2 focus-visible:ring-blue-500/20 resize-none"
             />
           </FieldGroup>
 
@@ -568,7 +568,7 @@ export function NewCaseForm({ userTier = 'free' }: NewCaseFormProps) {
               onChange={(e) => setField('client_notes', e.target.value)}
               placeholder="e.g. Please pay particular attention to the background area…"
               rows={2}
-              className="w-full rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 resize-none dark:bg-input/30"
+              className="w-full rounded-lg border border-[#1E293B] bg-[#0A1628] text-white px-2.5 py-2 text-sm outline-none placeholder:text-[#334155] focus-visible:border-blue-500/50 focus-visible:ring-2 focus-visible:ring-blue-500/20 resize-none"
             />
           </FieldGroup>
 
@@ -584,8 +584,8 @@ export function NewCaseForm({ userTier = 'free' }: NewCaseFormProps) {
       {step === 2 && (
         <div className="space-y-5">
           <div>
-            <h2 className="text-sm font-semibold">Upload Image for Analysis</h2>
-            <p className="mt-0.5 text-xs text-muted-foreground">
+            <h2 className="text-sm font-semibold text-white">Upload Image for Analysis</h2>
+            <p className="mt-0.5 text-xs text-[#64748B]">
               Upload the image you wish to submit for forensic review.
             </p>
           </div>

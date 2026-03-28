@@ -111,7 +111,7 @@ export function ImageUploader({ onChange, value, disabled }: ImageUploaderProps)
 
   if (value) {
     return (
-      <div className="rounded-xl border border-border bg-muted/20 p-4">
+      <div className="rounded-xl border border-[#1E293B] bg-[#0A1628] p-4">
         <div className="flex items-start gap-4">
           {/* Preview or icon */}
           <div className="relative size-20 shrink-0 overflow-hidden rounded-lg bg-muted">
@@ -132,7 +132,7 @@ export function ImageUploader({ onChange, value, disabled }: ImageUploaderProps)
 
           {/* File info */}
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium">{value.name}</p>
+            <p className="truncate text-sm font-medium text-white">{value.name}</p>
             <p className="mt-0.5 text-xs text-muted-foreground">
               {formatFileSize(value.size)}
             </p>
@@ -161,10 +161,10 @@ export function ImageUploader({ onChange, value, disabled }: ImageUploaderProps)
         className={cn(
           'flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-12 text-center transition-all duration-200',
           isDragActive && !isDragReject
-            ? 'border-primary bg-primary/5'
+            ? 'border-blue-500 bg-blue-500/5'
             : isDragReject
             ? 'border-destructive bg-destructive/5'
-            : 'border-border bg-muted/10 hover:border-primary/50 hover:bg-muted/20',
+            : 'border-[#1E293B] bg-[#0A1628] hover:border-blue-500/50 hover:bg-blue-500/5',
           disabled && 'cursor-not-allowed opacity-50'
         )}
       >
@@ -188,7 +188,7 @@ export function ImageUploader({ onChange, value, disabled }: ImageUploaderProps)
           </p>
         ) : (
           <>
-            <p className="text-sm font-medium">
+            <p className="text-sm font-medium text-white">
               Drag &amp; drop your image here
             </p>
             <p className="mt-1 text-xs text-muted-foreground">

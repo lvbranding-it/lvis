@@ -218,7 +218,7 @@ export function AppShell({ profile, children }: AppShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
 
   return (
-    <div className="dark flex h-screen overflow-hidden bg-[#060E1C]">
+    <div className="dark flex h-screen overflow-hidden bg-[#060E1C] text-foreground">
       {/* Desktop sidebar */}
       <aside className="hidden w-64 shrink-0 flex-col border-r border-[#1E293B] bg-[#0A1628] md:flex">
         <SidebarContent profile={profile} />
