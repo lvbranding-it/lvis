@@ -101,13 +101,13 @@ export function HowItWorks() {
         </div>
 
         {/* Methodology showcase image */}
-        <div className="mb-12 rounded-2xl overflow-hidden border border-white/5">
+        <div className="mb-12 flex justify-center">
           <Image
             src="/marketing/lvis-methodology.png"
             alt="LV Authenticity Index™ methodology overview"
-            width={1280}
-            height={640}
-            className="w-full object-cover"
+            width={800}
+            height={400}
+            className="w-full max-w-2xl object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.5)]"
           />
         </div>
 

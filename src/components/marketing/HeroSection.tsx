@@ -90,9 +90,9 @@ export function HeroSection() {
             <Image
               src="/marketing/lvis-hero.png"
               alt="LV Authenticity Index™ sample report"
-              width={560}
-              height={700}
-              className="w-full max-w-lg rounded-2xl shadow-2xl"
+              width={700}
+              height={875}
+              className="w-full max-w-xl"
               priority
             />
           </div>
