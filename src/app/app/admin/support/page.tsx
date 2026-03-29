@@ -1,5 +1,6 @@
 import { createServiceClient } from '@/lib/supabase/server'
 import { CheckCircle2, Clock, AlertCircle, MessageSquare } from 'lucide-react'
+import { QuickResponseDialog } from '@/components/app/admin/QuickResponseDialog'
 
 const STATUS_CONFIG = {
   open: { label: 'Open', color: 'text-amber-400 bg-amber-400/10 border-amber-400/20', Icon: AlertCircle },
@@ -186,6 +187,12 @@ export default async function AdminSupportPage({
                     >
                       Reply via email
                     </a>
+                    <QuickResponseDialog
+                      ticketId={ticket.id}
+                      ticketEmail={ticket.email}
+                      ticketName={ticket.name}
+                      userId={ticket.user_id ?? null}
+                    />
                   </div>
                 </div>
               </details>
