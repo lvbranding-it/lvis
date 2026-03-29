@@ -222,8 +222,8 @@ export function BillingClient({ currentTier, pendingInvoiceUrl, highlightPlan }:
             </div>
             <p className="text-xs text-muted-foreground">
               To modify or cancel your subscription, contact us at{' '}
-              <a href="mailto:support@thelvis.com" className="underline hover:text-foreground">
-                support@thelvis.com
+              <a href="mailto:admin@lvbranding.com" className="underline hover:text-foreground">
+                admin@lvbranding.com
               </a>
             </p>
           </div>
