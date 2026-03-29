@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter, JetBrains_Mono } from 'next/font/google'
 import { Toaster } from 'sonner'
+import { SupportChat } from '@/components/support/SupportChat'
 import './globals.css'
 
 const inter = Inter({
@@ -32,6 +33,7 @@ export default function RootLayout({
       <body className="bg-background text-foreground antialiased min-h-screen" suppressHydrationWarning>
         {children}
         <Toaster richColors position="top-right" />
+        <SupportChat />
       </body>
     </html>
   )

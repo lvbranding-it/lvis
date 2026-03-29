@@ -10,6 +10,7 @@ import {
   FolderKanban,
   Users,
   FileText,
+  LifeBuoy,
   Menu,
   LogOut,
   ChevronRight,
@@ -33,6 +34,7 @@ const ICON_MAP = {
   FolderKanban,
   Users,
   FileText,
+  LifeBuoy,
 } as const
 
 type IconName = keyof typeof ICON_MAP

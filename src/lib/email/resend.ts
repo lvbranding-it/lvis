@@ -139,3 +139,80 @@ export async function sendReportReadyEmail(opts: SendReportEmailOptions): Promis
     html,
   })
 }
+
+interface SendSupportTicketOptions {
+  ticketId: string
+  name: string
+  email: string
+  subject?: string
+  message: string
+  conversationLength: number
+}
+
+export async function sendSupportTicketEmail(opts: SendSupportTicketOptions): Promise<void> {
+  const { ticketId, name, email, subject, message, conversationLength } = opts
+  const from = process.env.RESEND_FROM_EMAIL ?? 'LVIS™ <onboarding@resend.dev>'
+  const adminEmail = process.env.SUPPORT_EMAIL ?? 'admin@lvbranding.com'
+  const shortId = ticketId.slice(0, 8).toUpperCase()
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>New Support Ticket — LVIS™</title>
+</head>
+<body style="margin:0;padding:0;background:#F1F5F9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F1F5F9;padding:32px 16px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+          <!-- Header -->
+          <tr>
+            <td style="background:#0F172A;border-radius:12px 12px 0 0;padding:28px 40px;">
+              <span style="display:inline-block;background:#1E40AF;color:#F8FAFC;font-size:18px;font-weight:700;letter-spacing:2px;padding:4px 12px;border-radius:4px;">LVIS™</span>
+              <span style="display:inline-block;color:#93C5FD;font-size:11px;letter-spacing:1px;margin-left:10px;vertical-align:middle;">SUPPORT TICKET</span>
+              <p style="margin:16px 0 0;color:#94A3B8;font-size:12px;font-family:monospace;">Ticket #${shortId}</p>
+            </td>
+          </tr>
+          <!-- Body -->
+          <tr>
+            <td style="background:#FFFFFF;padding:32px 40px;border-left:1px solid #E2E8F0;border-right:1px solid #E2E8F0;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+                <tr>
+                  <td style="padding:6px 0;border-bottom:1px solid #F1F5F9;">
+                    <span style="color:#94A3B8;font-size:11px;text-transform:uppercase;letter-spacing:1px;">From</span>
+                    <p style="margin:4px 0 0;color:#1E293B;font-size:14px;font-weight:600;">${name} &lt;${email}&gt;</p>
+                  </td>
+                </tr>
+                ${subject ? `<tr><td style="padding:6px 0;border-bottom:1px solid #F1F5F9;"><span style="color:#94A3B8;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Subject</span><p style="margin:4px 0 0;color:#1E293B;font-size:14px;">${subject}</p></td></tr>` : ''}
+                ${conversationLength > 0 ? `<tr><td style="padding:6px 0;border-bottom:1px solid #F1F5F9;"><span style="color:#94A3B8;font-size:11px;text-transform:uppercase;letter-spacing:1px;">AI Chat</span><p style="margin:4px 0 0;color:#475569;font-size:13px;">${conversationLength} messages exchanged before escalation</p></td></tr>` : ''}
+              </table>
+              <p style="margin:0 0 8px;color:#94A3B8;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Message</p>
+              <div style="background:#F8FAFC;border-left:3px solid #1D4ED8;padding:16px 20px;border-radius:0 6px 6px 0;">
+                <p style="margin:0;color:#334155;font-size:14px;line-height:1.7;white-space:pre-wrap;">${message}</p>
+              </div>
+              <p style="margin:24px 0 0;color:#94A3B8;font-size:12px;">Reply directly to this email to respond to ${name}.</p>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="background:#F8FAFC;border-radius:0 0 12px 12px;padding:16px 40px;border:1px solid #E2E8F0;border-top:0;">
+              <p style="margin:0;color:#94A3B8;font-size:11px;text-align:center;">LVIS™ Support System — LV Branding</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`
+
+  await getResend().emails.send({
+    from,
+    to: adminEmail,
+    replyTo: email,
+    subject: `[Support #${shortId}] ${subject ?? message.slice(0, 60)}`,
+    html,
+  })
+}

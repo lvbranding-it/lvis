@@ -82,4 +82,5 @@ export const ADMIN_NAV_ITEMS = [
   { label: 'All Cases', href: '/app/admin/cases', icon: 'FolderKanban' },
   { label: 'Clients', href: '/app/admin/clients', icon: 'Users' },
   { label: 'Reports', href: '/app/admin/reports', icon: 'FileText' },
+  { label: 'Support', href: '/app/admin/support', icon: 'LifeBuoy' },
 ] as const
