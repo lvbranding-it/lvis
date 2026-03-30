@@ -1057,7 +1057,7 @@ export function LVISReportDocument(props: LVISReportDocumentProps) {
         </View>
 
         {/* Footer styled for dark bg */}
-        <View style={[s.footer, { borderTopColor: '#1E3A5F' }]} fixed>
+        <View style={[s.footer, { borderTopColor: '#1E3A5F' }]}>
           <Text style={[s.footerText, { color: '#334155' }]}>LVIS™ Forensic Analysis Report — {caseNumber}</Text>
           <Text
             style={[s.footerText, { color: '#334155' }]}
@@ -1356,8 +1356,6 @@ export function LVISReportDocument(props: LVISReportDocumentProps) {
           <FindingsSection category="manipulation" data={claudeFindings.manipulation} />
           <FindingsSection category="synthetic_risk" data={claudeFindings.synthetic_risk} />
         </View>
-
-        <PageFooter caseNumber={caseNumber} />
       </Page>
 
       {/* ═══════════════════════════════════════════════════════════════════
@@ -1441,7 +1439,7 @@ export function LVISReportDocument(props: LVISReportDocumentProps) {
           {/* Signature block — wrap={false} keeps the sig image, name, seal, and
               case reference together as a single unit. The disclaimer above can flow,
               but the signature itself never splits across pages. */}
-          <View style={s.signatureBlock} wrap={false}>
+          <View style={s.signatureBlock}>
             {/* Left: signature image + name */}
             <View style={s.signatureLeft}>
               {hasSignature ? (
