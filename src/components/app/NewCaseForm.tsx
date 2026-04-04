@@ -16,6 +16,7 @@ import {
   UploadCloud,
   Brain,
   FileCheck,
+  Link2,
 } from 'lucide-react'
 import { Lock } from 'lucide-react'
 import Link from 'next/link'
@@ -144,6 +145,8 @@ export function NewCaseForm({ userTier = 'free' }: NewCaseFormProps) {
     client_notes: '',
   })
   const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imageSource, setImageSource] = useState<'upload' | 'url'>('upload')
+  const [imageUrl, setImageUrl] = useState('')
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({})
   const [submitting, setSubmitting] = useState(false)
   const [progressSteps, setProgressSteps] = useState<ProgressStep[]>([])
@@ -173,14 +176,19 @@ export function NewCaseForm({ userTier = 'free' }: NewCaseFormProps) {
   }
 
   const handleSubmit = async () => {
-    if (!imageFile) {
+    if (imageSource === 'upload' && !imageFile) {
       toast.error('Please select an image to upload.')
       return
     }
+    if (imageSource === 'url' && !imageUrl.trim().startsWith('http')) {
+      toast.error('Please enter a valid image URL.')
+      return
+    }
 
+    const uploadLabel = imageSource === 'url' ? 'Fetching image from URL' : 'Uploading image'
     const steps: ProgressStep[] = [
       { label: 'Creating case record', icon: <FileCheck className="size-4" />, status: 'pending' },
-      { label: 'Uploading image', icon: <UploadCloud className="size-4" />, status: 'pending' },
+      { label: uploadLabel, icon: <UploadCloud className="size-4" />, status: 'pending' },
       { label: 'Queuing analysis', icon: <Brain className="size-4" />, status: 'pending' },
     ]
     setProgressSteps(steps)
@@ -211,70 +219,84 @@ export function NewCaseForm({ userTier = 'free' }: NewCaseFormProps) {
 
       // Step 2: Upload image
       updateProgress(1, 'running')
-      // Browsers report RAW files as "" (unknown MIME type).
-      // Map known RAW extensions to their proper image/x-* MIME types.
-      const RAW_MIME_MAP: Record<string, string> = {
-        '.cr2': 'image/x-canon-cr2',
-        '.cr3': 'image/x-canon-cr3',
-        '.nef': 'image/x-nikon-nef',
-        '.arw': 'image/x-sony-arw',
-        '.dng': 'image/x-adobe-dng',
-        '.orf': 'image/x-olympus-orf',
-        '.rw2': 'image/x-panasonic-rw2',
-        '.raf': 'image/x-fuji-raf',
-      }
-      const RAW_EXTENSIONS = Object.keys(RAW_MIME_MAP)
-      const fileExt = '.' + (imageFile.name.split('.').pop() ?? '').toLowerCase()
-      const isRawFile = RAW_EXTENSIONS.includes(fileExt)
-      const resolvedFileType = imageFile.type || RAW_MIME_MAP[fileExt] || 'image/x-raw'
 
-      if (isRawFile) {
-        // RAW files: send raw binary body to our API route.
-        // Metadata travels in X-* headers — completely avoids Next.js's
-        // multipart form-data parser which has a restrictive body size limit.
-        // The server uploads with service role, bypassing Supabase MIME restrictions.
-        const uploadRes = await fetch(`/api/cases/${caseId}/upload`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/octet-stream',
-            'X-File-Name': imageFile.name,
-            'X-File-Type': resolvedFileType,
-            'X-File-Size': String(imageFile.size),
-          },
-          body: imageFile,
-        })
-
-        if (!uploadRes.ok) {
-          const data = await uploadRes.json()
-          throw new Error(data.error ?? 'Failed to upload RAW file')
-        }
-      } else {
-        // Standard images: get signed URL, PUT directly to Supabase Storage
-        const uploadRes = await fetch(`/api/cases/${caseId}/upload`, {
+      if (imageSource === 'url') {
+        // Server-side URL fetch — no client download needed
+        const urlRes = await fetch(`/api/cases/${caseId}/upload-url`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            fileName: imageFile.name,
-            fileType: resolvedFileType,
-            fileSize: imageFile.size,
-          }),
+          body: JSON.stringify({ imageUrl: imageUrl.trim() }),
         })
-
-        if (!uploadRes.ok) {
-          const data = await uploadRes.json()
-          throw new Error(data.error ?? 'Failed to get upload URL')
+        if (!urlRes.ok) {
+          const data = await urlRes.json()
+          throw new Error(data.error ?? 'Failed to fetch image from URL')
         }
-        const { signedUrl } = await uploadRes.json()
+      } else {
+        // Browsers report RAW files as "" (unknown MIME type).
+        // Map known RAW extensions to their proper image/x-* MIME types.
+        const RAW_MIME_MAP: Record<string, string> = {
+          '.cr2': 'image/x-canon-cr2',
+          '.cr3': 'image/x-canon-cr3',
+          '.nef': 'image/x-nikon-nef',
+          '.arw': 'image/x-sony-arw',
+          '.dng': 'image/x-adobe-dng',
+          '.orf': 'image/x-olympus-orf',
+          '.rw2': 'image/x-panasonic-rw2',
+          '.raf': 'image/x-fuji-raf',
+        }
+        const RAW_EXTENSIONS = Object.keys(RAW_MIME_MAP)
+        const fileExt = '.' + (imageFile!.name.split('.').pop() ?? '').toLowerCase()
+        const isRawFile = RAW_EXTENSIONS.includes(fileExt)
+        const resolvedFileType = imageFile!.type || RAW_MIME_MAP[fileExt] || 'image/x-raw'
 
-        // PUT directly to storage
-        const putRes = await fetch(signedUrl, {
-          method: 'PUT',
-          headers: { 'Content-Type': resolvedFileType },
-          body: imageFile,
-        })
+        if (isRawFile) {
+          // RAW files: send raw binary body to our API route.
+          // Metadata travels in X-* headers — completely avoids Next.js's
+          // multipart form-data parser which has a restrictive body size limit.
+          // The server uploads with service role, bypassing Supabase MIME restrictions.
+          const uploadRes = await fetch(`/api/cases/${caseId}/upload`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/octet-stream',
+              'X-File-Name': imageFile!.name,
+              'X-File-Type': resolvedFileType,
+              'X-File-Size': String(imageFile!.size),
+            },
+            body: imageFile,
+          })
 
-        if (!putRes.ok) {
-          throw new Error('Failed to upload image to storage')
+          if (!uploadRes.ok) {
+            const data = await uploadRes.json()
+            throw new Error(data.error ?? 'Failed to upload RAW file')
+          }
+        } else {
+          // Standard images: get signed URL, PUT directly to Supabase Storage
+          const uploadRes = await fetch(`/api/cases/${caseId}/upload`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              fileName: imageFile!.name,
+              fileType: resolvedFileType,
+              fileSize: imageFile!.size,
+            }),
+          })
+
+          if (!uploadRes.ok) {
+            const data = await uploadRes.json()
+            throw new Error(data.error ?? 'Failed to get upload URL')
+          }
+          const { signedUrl } = await uploadRes.json()
+
+          // PUT directly to storage
+          const putRes = await fetch(signedUrl, {
+            method: 'PUT',
+            headers: { 'Content-Type': resolvedFileType },
+            body: imageFile,
+          })
+
+          if (!putRes.ok) {
+            throw new Error('Failed to upload image to storage')
+          }
         }
       }
       updateProgress(1, 'done')
@@ -584,17 +606,63 @@ export function NewCaseForm({ userTier = 'free' }: NewCaseFormProps) {
       {step === 2 && (
         <div className="space-y-5">
           <div>
-            <h2 className="text-sm font-semibold text-white">Upload Image for Analysis</h2>
+            <h2 className="text-sm font-semibold text-white">Add Image for Analysis</h2>
             <p className="mt-0.5 text-xs text-[#64748B]">
-              Upload the image you wish to submit for forensic review.
+              Upload a file or provide a direct link to the image you wish to submit.
             </p>
           </div>
 
-          <ImageUploader
-            onChange={setImageFile}
-            value={imageFile}
-            disabled={submitting}
-          />
+          {/* Source toggle */}
+          <div className="flex gap-1 rounded-lg border border-[#1E293B] bg-[#060E1C] p-1">
+            <button
+              type="button"
+              onClick={() => setImageSource('upload')}
+              className={cn(
+                'flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
+                imageSource === 'upload'
+                  ? 'bg-[#1E293B] text-white'
+                  : 'text-[#64748B] hover:text-white'
+              )}
+            >
+              <UploadCloud className="size-3.5" />
+              Upload File
+            </button>
+            <button
+              type="button"
+              onClick={() => setImageSource('url')}
+              className={cn(
+                'flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
+                imageSource === 'url'
+                  ? 'bg-[#1E293B] text-white'
+                  : 'text-[#64748B] hover:text-white'
+              )}
+            >
+              <Link2 className="size-3.5" />
+              From URL
+            </button>
+          </div>
+
+          {imageSource === 'upload' ? (
+            <ImageUploader
+              onChange={setImageFile}
+              value={imageFile}
+              disabled={submitting}
+            />
+          ) : (
+            <div className="space-y-2">
+              <input
+                type="url"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                placeholder="https://example.com/photo.jpg"
+                disabled={submitting}
+                className="w-full rounded-lg border border-[#1E293B] bg-[#0A1628] px-3 py-2 text-sm text-white placeholder-[#334155] outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50 transition-colors"
+              />
+              <p className="text-xs text-[#64748B]">
+                Paste a direct link to an image (JPEG, PNG, TIFF, WEBP, or RAW). The image will be fetched server-side.
+              </p>
+            </div>
+          )}
 
           <div className="flex items-center justify-between pt-2">
             <Button
@@ -609,7 +677,10 @@ export function NewCaseForm({ userTier = 'free' }: NewCaseFormProps) {
             <Button
               onClick={handleSubmit}
               size="sm"
-              disabled={!imageFile || submitting}
+              disabled={
+                submitting ||
+                (imageSource === 'upload' ? !imageFile : !imageUrl.trim().startsWith('http'))
+              }
             >
               {submitting ? (
                 <>
