@@ -16,6 +16,7 @@ export const metadata: Metadata = {
   title: 'Services — LVIS™',
   description:
     'Professional forensic image analysis services: integrity analysis, competition verification, manipulation detection, AI assessment, and expert opinion reports.',
+  alternates: { canonical: 'https://www.thelvis.com/services' },
 }
 
 const services = [

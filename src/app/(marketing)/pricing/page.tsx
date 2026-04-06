@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: 'Pricing — LVIS™',
   description:
     'LVIS™ pricing: free tier, pay-per-report, Pro subscription, and Enterprise agreements for high-volume and institutional use.',
+  alternates: { canonical: 'https://www.thelvis.com/pricing' },
 }
 
 const tiers = [
