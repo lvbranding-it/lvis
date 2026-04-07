@@ -1,6 +1,4 @@
 import type { Metadata } from 'next'
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
 import { HeroSection } from '@/components/marketing/HeroSection'
 import { TheProblemSection } from '@/components/marketing/TheProblemSection'
 import { HowItWorks } from '@/components/marketing/HowItWorks'
@@ -38,9 +36,6 @@ const jsonLd = {
 }
 
 export default async function HomePage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (user) redirect('/app/dashboard')
   return (
     <>
       <script

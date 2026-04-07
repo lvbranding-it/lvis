@@ -2,8 +2,9 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
-import { MenuIcon, XIcon } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { MenuIcon, XIcon, LayoutDashboard } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 import {
   Sheet,
   SheetContent,
@@ -24,6 +25,14 @@ const navLinks = [
 export function Navbar() {
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session)
+    })
+  }, [])
 
   const isActive = (href: string) => {
     if (href.startsWith('/#')) return pathname === '/'
@@ -59,23 +68,37 @@ export function Navbar() {
 
           {/* Desktop CTA buttons */}
           <div className="hidden md:flex items-center gap-2 shrink-0">
-            <Link href="/auth/login">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-[#94A3B8] hover:text-white hover:bg-white/5"
-              >
-                Log In
-              </Button>
-            </Link>
-            <Link href="/auth/signup">
-              <Button
-                size="sm"
-                className="bg-[#1D4ED8] hover:bg-[#1E40AF] text-white border-0 font-medium"
-              >
-                Get Started Free
-              </Button>
-            </Link>
+            {isLoggedIn ? (
+              <Link href="/app/dashboard">
+                <Button
+                  size="sm"
+                  className="bg-[#1D4ED8] hover:bg-[#1E40AF] text-white border-0 font-medium"
+                >
+                  <LayoutDashboard className="size-3.5 mr-1.5" />
+                  Go to Dashboard
+                </Button>
+              </Link>
+            ) : (
+              <>
+                <Link href="/auth/login">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-[#94A3B8] hover:text-white hover:bg-white/5"
+                  >
+                    Log In
+                  </Button>
+                </Link>
+                <Link href="/auth/signup">
+                  <Button
+                    size="sm"
+                    className="bg-[#1D4ED8] hover:bg-[#1E40AF] text-white border-0 font-medium"
+                  >
+                    Get Started Free
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile hamburger */}
@@ -130,19 +153,30 @@ export function Navbar() {
                 </nav>
 
                 <div className="flex flex-col gap-2 px-4 pt-4 border-t border-white/10">
-                  <Link href="/auth/login" onClick={() => setMobileOpen(false)}>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start text-[#94A3B8] hover:text-white hover:bg-white/5"
-                    >
-                      Log In
-                    </Button>
-                  </Link>
-                  <Link href="/auth/signup" onClick={() => setMobileOpen(false)}>
-                    <Button className="w-full bg-[#1D4ED8] hover:bg-[#1E40AF] text-white border-0">
-                      Get Started Free
-                    </Button>
-                  </Link>
+                  {isLoggedIn ? (
+                    <Link href="/app/dashboard" onClick={() => setMobileOpen(false)}>
+                      <Button className="w-full bg-[#1D4ED8] hover:bg-[#1E40AF] text-white border-0">
+                        <LayoutDashboard className="size-4 mr-2" />
+                        Go to Dashboard
+                      </Button>
+                    </Link>
+                  ) : (
+                    <>
+                      <Link href="/auth/login" onClick={() => setMobileOpen(false)}>
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start text-[#94A3B8] hover:text-white hover:bg-white/5"
+                        >
+                          Log In
+                        </Button>
+                      </Link>
+                      <Link href="/auth/signup" onClick={() => setMobileOpen(false)}>
+                        <Button className="w-full bg-[#1D4ED8] hover:bg-[#1E40AF] text-white border-0">
+                          Get Started Free
+                        </Button>
+                      </Link>
+                    </>
+                  )}
                 </div>
               </SheetContent>
             </Sheet>
